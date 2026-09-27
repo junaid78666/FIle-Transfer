@@ -25,9 +25,9 @@ def app():
         db.drop_all()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def client(app):
-    """Flask test client."""
+    """Fresh Flask test client per test (clean cookie jar)."""
     return app.test_client()
 
 
@@ -168,6 +168,7 @@ class TestLogin:
     def test_wrong_password_rejected(self, client):
         """Wrong password returns 401."""
         register(client)
+        logout(client)  # Ensure not logged in
         response = login(client, password="WrongP@ss1")
         assert response.status_code == 401
         data = response.get_json()
@@ -175,11 +176,13 @@ class TestLogin:
 
     def test_unknown_email_rejected(self, client):
         """Unknown email returns 401 (not 404 — prevents user enumeration)."""
+        logout(client)  # Ensure not logged in
         response = login(client, email="nobody@example.com", password="Str0ng!Pass")
         assert response.status_code == 401
 
     def test_missing_password_rejected(self, client):
         """Missing password field returns 400."""
+        logout(client)  # Ensure not logged in
         response = client.post("/auth/login", json={"email": "test@example.com"})
         assert response.status_code == 400
 
@@ -194,17 +197,18 @@ class TestLogin:
 
     def test_me_returns_401_when_not_logged_in(self, client):
         """GET /auth/me without session returns 401."""
-        with client.session_transaction() as sess:
-            sess.clear()
+        logout(client)  # Explicitly clear any session
         response = client.get("/auth/me")
         assert response.status_code == 401
 
     def test_last_login_updated_on_login(self, app, client):
         """last_login_at is updated on successful login."""
         register(client)
+        logout(client)
         login(client)
         with app.app_context():
             user = User.query.filter_by(email="test@example.com").first()
+            assert user is not None
             assert user.last_login_at is not None
 
 
@@ -266,7 +270,6 @@ class TestUserListing:
 
     def test_list_users_requires_login(self, client):
         """GET /auth/users/list requires authentication."""
-        with client.session_transaction() as sess:
-            sess.clear()
+        logout(client)  # Ensure not logged in
         response = client.get("/auth/users/list")
         assert response.status_code == 401

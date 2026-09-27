@@ -182,7 +182,7 @@ def download_file(transfer_id: str):
     Response 422: Decryption or integrity failure
     """
     # ── Fetch transfer ────────────────────────────────────────
-    transfer = Transfer.query.get(transfer_id)
+    transfer = db.session.get(Transfer, transfer_id)
     if not transfer:
         return jsonify({
             "status": "error",
@@ -464,7 +464,7 @@ def transfer_info(transfer_id: str):
     Response 403: Not sender or receiver
     Response 404: Not found
     """
-    transfer = Transfer.query.get(transfer_id)
+    transfer = db.session.get(Transfer, transfer_id)
     if not transfer:
         return jsonify({"status": "error", "message": "Transfer not found."}), 404
 
@@ -495,7 +495,7 @@ def delete_transfer(transfer_id: str):
     Response 403: Not the sender, or transfer already downloaded
     Response 404: Transfer not found
     """
-    transfer = Transfer.query.get(transfer_id)
+    transfer = db.session.get(Transfer, transfer_id)
     if not transfer:
         return jsonify({"status": "error", "message": "Transfer not found."}), 404
 

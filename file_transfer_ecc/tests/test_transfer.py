@@ -27,8 +27,9 @@ def app():
         db.drop_all()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def client(app):
+    """Fresh Flask test client per test (clean cookie jar)."""
     return app.test_client()
 
 
@@ -193,7 +194,7 @@ class TestSendFile:
 class TestDownloadFile:
 
     def _send_file(self, app, client):
-        """Helper to register users, log in as Alice, and send Bob a file."""
+        """Helper: register users, log in as Alice, send Bob a file, then log out."""
         register_user(client, ALICE)
         register_user(client, BOB)
         login_as(client, ALICE["email"])
@@ -207,7 +208,7 @@ class TestDownloadFile:
             },
             content_type="multipart/form-data",
         )
-        logout(client)
+        logout(client)  # Always log out after sending
         with app.app_context():
             return Transfer.query.first().id, content
 
@@ -308,7 +309,7 @@ class TestTransferListing:
             data={**make_file_data(), "receiver_id": bob_id},
             content_type="multipart/form-data",
         )
-
+        logout(client)  # Ensure clean state after setup
     def test_inbox_shows_received_transfers(self, app, client):
         """Bob sees the file Alice sent him in his inbox."""
         self._setup_transfer(app, client)
@@ -391,6 +392,7 @@ class TestTransferManagement:
             data={**make_file_data(), "receiver_id": bob_id},
             content_type="multipart/form-data",
         )
+        logout(client)  # Ensure clean state
         with app.app_context():
             return Transfer.query.first().id
 
@@ -435,7 +437,7 @@ class TestTransferManagement:
         assert response.status_code == 200
 
         with app.app_context():
-            assert Transfer.query.get(transfer_id) is None
+            assert db.session.get(Transfer, transfer_id) is None
 
     def test_receiver_cannot_delete_transfer(self, app, client):
         """Receiver cannot delete a transfer they received."""

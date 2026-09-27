@@ -60,10 +60,20 @@ def create_app(config_name: str = None) -> Flask:
 
     # ── Configure Flask-Login ─────────────────────────────────
     login_manager.init_app(app)
-    login_manager.login_view = "auth.login"           # Redirect here if not authenticated
+    login_manager.login_view = "auth.login"
     login_manager.login_message = "Please log in to access this page."
     login_manager.login_message_category = "warning"
     login_manager.session_protection = "strong"
+
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        """Return 401 JSON for unauthenticated API requests instead of 302 redirect."""
+        from flask import jsonify
+        return jsonify({
+            "status": "error",
+            "message": "Authentication required. Please log in.",
+            "code": 401,
+        }), 401
 
     # ── User loader callback ──────────────────────────────────
     from app.models.user import User  # Import here to avoid circular imports

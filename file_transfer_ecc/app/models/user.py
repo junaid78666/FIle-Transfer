@@ -105,9 +105,14 @@ class User(UserMixin, db.Model):
 
     # ── Helper Methods ────────────────────────────────────────
     def update_last_login(self) -> None:
-        """Update last_login_at to current UTC time and commit."""
+        """Update last_login_at to current UTC time and flush/commit."""
         self.last_login_at = datetime.now(timezone.utc)
-        db.session.commit()
+        db.session.add(self)
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise
 
     def to_dict(self, include_timestamps: bool = False) -> dict:
         """
