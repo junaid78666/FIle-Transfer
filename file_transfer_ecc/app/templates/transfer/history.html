@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Transfer Audit Ledger{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/transfer.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="history-page-container">
+  <div class="page-title-row">
+    <div>
+      <h2>Transfer Audit Ledger</h2>
+      <p class="subtitle">Complete verifiable history of encrypted outbound and inbound transfers.</p>
+    </div>
+    <div class="filter-group">
+      <input type="text" id="history-search" class="search-input" placeholder="Search by filename or user...">
+      <select id="direction-filter" class="filter-select">
+        <option value="all">All Transfers</option>
+        <option value="sent">Outbound (Sent)</option>
+        <option value="received">Inbound (Received)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="glass-card table-card">
+    <table class="data-table" id="history-table">
+      <thead>
+        <tr>
+          <th>Direction</th>
+          <th>File Details</th>
+          <th>Counterparty</th>
+          <th>SHA-256 Checksum</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="history-table-body">
+        <tr><td colspan="7" class="loading-td">Loading audit records...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}

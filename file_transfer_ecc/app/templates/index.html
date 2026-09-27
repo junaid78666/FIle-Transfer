@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+
+{% block title %}Cryptographic File Exchange & Elliptic Curves{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/landing.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section with Three.js Ambient 3D Lattice Background -->
+<section class="hero-section">
+  <div id="hero-three-container" class="three-canvas-container" aria-hidden="true"></div>
+
+  <div class="hero-content animate-fade-in-up" style="position: relative; z-index: 2;">
+    <div class="crypto-badge hero-badge">
+      <span class="pulse-dot"></span> 100% Free & Secure Hybrid Cryptography
+    </div>
+    <h1 class="hero-title">
+      Every tool you need to transfer files with <span class="gradient-text">Elliptic Curves</span>
+    </h1>
+    <p class="hero-description">
+      Zero-Trust File Transfer made simple, 100% secure, and effortless.
+      NIST P-256 ECDH session agreement, AES-256-GCM authenticated payload encryption, and SHA-256 integrity verification.
+    </p>
+
+    <div class="hero-actions">
+      {% if current_user.is_authenticated %}
+        <a href="/transfer/send" class="btn btn-hero-action">Select File to Encrypt</a>
+      {% else %}
+        <a href="/auth/register" class="btn btn-hero-action">Get Started</a>
+        <a href="/auth/login" class="btn btn-secondary btn-lg">Log in</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Cryptographic Tool Cards Grid -->
+<section class="features-section">
+  <div class="section-header">
+    <h2 class="section-title">Cryptographic Tool Suite</h2>
+    <p class="section-subtitle">Everything you need to send, receive, and verify encrypted files</p>
+  </div>
+
+  <div class="features-grid">
+    <!-- Tool Card 1 -->
+    <a href="{% if current_user.is_authenticated %}/transfer/send{% else %}/auth/login{% endif %}" class="feature-card card-hover-fx animate-fade-in-up stagger-1">
+      <div class="feature-icon-wrapper red">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </div>
+      <h3>Send Encrypted File</h3>
+      <p>Encrypt any file with a random 256-bit AES-GCM session key and encapsulate it for your recipient using NIST P-256 ECIES.</p>
+    </a>
+
+    <!-- Tool Card 2 -->
+    <a href="{% if current_user.is_authenticated %}/transfer/inbox{% else %}/auth/login{% endif %}" class="feature-card card-hover-fx animate-fade-in-up stagger-2">
+      <div class="feature-icon-wrapper emerald">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <h3>Decrypt Inbound File</h3>
+      <p>Unlock your private key with your account password to compute the shared secret, decrypt payload, and verify SHA-256 integrity.</p>
+    </a>
+
+    <!-- Tool Card 3 -->
+    <a href="{% if current_user.is_authenticated %}/profile{% else %}/auth/login{% endif %}" class="feature-card card-hover-fx animate-fade-in-up stagger-3">
+      <div class="feature-icon-wrapper blue">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+          <path d="M2 12h20"/>
+        </svg>
+      </div>
+      <h3>ECC Key Vault</h3>
+      <p>Inspect your SECP256R1 public key in standard PEM format, check your SHA-256 fingerprint, and verify PBKDF2 at-rest key protection.</p>
+    </a>
+
+    <!-- Tool Card 4 -->
+    <a href="{% if current_user.is_authenticated %}/transfer/history{% else %}/auth/login{% endif %}" class="feature-card card-hover-fx animate-fade-in-up stagger-4">
+      <div class="feature-icon-wrapper amber">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+      </div>
+      <h3>Audit Ledger</h3>
+      <p>Immutable log of every sent and received file with SHA-256 checksums, status markers, and complete cryptographic receipts.</p>
+    </a>
+  </div>
+</section>
+
+<!-- Interactive 3D Elliptic Curve Geometry Section (Three.js) -->
+<section class="visualizer-section">
+  <div class="section-header">
+    <span class="crypto-badge">Mathematical Foundation</span>
+    <h2 class="section-title">Interactive 3D Elliptic Curve Arithmetic</h2>
+    <p class="section-subtitle">Real-time Three.js visualization of Weierstrass point addition: P + Q = R</p>
+  </div>
+
+  <div class="visualizer-split-grid">
+    <!-- Interactive Three.js WebGL Container -->
+    <div class="interactive-three-box" id="interactive-curve-container">
+      <span class="visualizer-badge">Three.js WebGL</span>
+      <span class="visualizer-hint">Drag mouse to orbit 3D curve</span>
+    </div>
+
+    <!-- Mathematical Explanation Card -->
+    <div class="visualizer-info-card card-hover-fx">
+      <h3>Weierstrass Equation & ECDH</h3>
+      <p>
+        The security of NIST P-256 relies on the <strong>Elliptic Curve Discrete Logarithm Problem (ECDLP)</strong>.
+        Given base generator point \( G \) and public key \( Q = d \cdot G \), computing private key \( d \) is computationally infeasible.
+      </p>
+
+      <div class="curve-points-legend">
+        <div class="legend-item">
+          <span class="legend-dot red"></span>
+          <div><strong>Point P (Alice):</strong> Sender's Ephemeral public point on curve</div>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot cyan"></span>
+          <div><strong>Point Q (Bob):</strong> Recipient's static NIST P-256 public key</div>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot green"></span>
+          <div><strong>Point R = P + Q:</strong> Intersecting chord and reflection yielding shared secret</div>
+        </div>
+      </div>
+
+      <div class="param-box">
+        Curve Equation: y&sup2; = x&sup3; - 3x + b (mod p)<br>
+        Prime field p = 2&sup2;&sup5;&sup6; - 2&sup2;&sup2;&sup4; + 2&sup1;&sup9;&sup2; + 2&sup9;&sup6; - 1<br>
+        Security Level: 128-bit (equivalent to RSA-3072)
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4-Stage Cryptographic Protocol Walkthrough -->
+<section class="protocol-section">
+  <div class="section-header">
+    <span class="crypto-badge">End-to-End Pipeline</span>
+    <h2 class="section-title">Zero-Trust Cryptographic Workflow</h2>
+    <p class="section-subtitle">How files are secured, encapsulated, and decrypted without exposing plaintext to servers</p>
+  </div>
+
+  <div class="protocol-timeline-grid">
+    <div class="protocol-step-card card-hover-fx">
+      <span class="step-number">01</span>
+      <span class="step-badge">Ephemeral Keypair</span>
+      <h4>1. NIST P-256 Agreement</h4>
+      <p>When Alice transfers a file, a cryptographically secure ephemeral keypair is generated in memory. Alice computes the ECDH shared secret using Bob's verified public key.</p>
+    </div>
+
+    <div class="protocol-step-card card-hover-fx">
+      <span class="step-number">02</span>
+      <span class="step-badge">Key Derivation</span>
+      <h4>2. HKDF-SHA256 Extraction</h4>
+      <p>The raw elliptic curve shared coordinate is fed into HMAC-based Extract-and-Expand Key Derivation Function (HKDF) to derive an uncompromising 256-bit symmetric session key.</p>
+    </div>
+
+    <div class="protocol-step-card card-hover-fx">
+      <span class="step-number">03</span>
+      <span class="step-badge">Payload Encryption</span>
+      <h4>3. AES-256-GCM Vault</h4>
+      <p>The original binary stream is encrypted using AES-256 in Galois/Counter Mode with a 96-bit unique IV. This ensures both confidentiality and 128-bit Galois authentication.</p>
+    </div>
+
+    <div class="protocol-step-card card-hover-fx">
+      <span class="step-number">04</span>
+      <span class="step-badge">Integrity Verification</span>
+      <h4>4. SHA-256 Audit Seal</h4>
+      <p>Bob decrypts the session key using his password-unlocked private key. The decrypted payload is hashed with SHA-256 and matched against the sender's seal to guarantee zero tampering.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Security Comparison: ECC vs Traditional RSA -->
+<section class="comparison-section">
+  <div class="section-header">
+    <span class="crypto-badge">Security Analysis</span>
+    <h2 class="section-title">Cryptographic Comparison: ECC vs RSA</h2>
+    <p class="section-subtitle">Why NIST P-256 Elliptic Curve Cryptography is superior for high-throughput secure transfer</p>
+  </div>
+
+  <div class="table-responsive-box card-hover-fx">
+    <table class="crypto-comparison-table">
+      <thead>
+        <tr>
+          <th>Algorithm & Standard</th>
+          <th>Key Size (Bits)</th>
+          <th>Symmetric Security</th>
+          <th>Computational Overhead</th>
+          <th>Energy Efficiency</th>
+          <th>Quantum Vulnerability</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight-row">
+          <td>ECC (NIST P-256 / SECP256R1)</td>
+          <td>256 bits</td>
+          <td>128-bit Security</td>
+          <td><span class="efficiency-tag best">Ultra Low (Fastest)</span></td>
+          <td><span class="efficiency-tag best">Optimal (Mobile Friendly)</span></td>
+          <td>Shor's Algorithm (Equal)</td>
+        </tr>
+        <tr>
+          <td>RSA-2048 (Legacy)</td>
+          <td>2048 bits</td>
+          <td>112-bit Security</td>
+          <td><span class="efficiency-tag standard">Moderate</span></td>
+          <td><span class="efficiency-tag standard">High CPU drain</span></td>
+          <td>Shor's Algorithm</td>
+        </tr>
+        <tr>
+          <td>RSA-3072</td>
+          <td>3072 bits</td>
+          <td>128-bit Security</td>
+          <td><span class="efficiency-tag slow">Heavy Overhead</span></td>
+          <td><span class="efficiency-tag slow">High Battery Drain</span></td>
+          <td>Shor's Algorithm</td>
+        </tr>
+        <tr>
+          <td>RSA-4096</td>
+          <td>4096 bits</td>
+          <td>140-bit Security</td>
+          <td><span class="efficiency-tag slow">Extreme Lag</span></td>
+          <td><span class="efficiency-tag slow">Impractical at Scale</span></td>
+          <td>Shor's Algorithm</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Cryptographic FAQ Accordion -->
+<section class="faq-section">
+  <div class="section-header">
+    <span class="crypto-badge">Project Defense FAQ</span>
+    <h2 class="section-title">Technical Architecture Questions</h2>
+    <p class="section-subtitle">Common questions regarding security implementation and academic evaluation</p>
+  </div>
+
+  <div class="faq-list">
+    <details class="faq-item">
+      <summary class="faq-summary">Why does the system use Hybrid Cryptography instead of pure ECC?</summary>
+      <div class="faq-content">
+        Elliptic Curve Cryptography is designed for asymmetric key agreement (ECDH) and digital signatures (ECDSA). Because asymmetric operations are mathematically intensive for multi-megabyte payloads, modern secure systems use ECIES (Elliptic Curve Integrated Encryption Scheme): ECC safely encapsulates a 256-bit symmetric session key, and AES-256-GCM encrypts the bulk file at hardware speeds.
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-summary">How are receiver private keys protected on the server?</summary>
+      <div class="faq-content">
+        Private keys are never stored in plaintext. During registration, the user's password undergoes PBKDF2-HMAC-SHA256 with 100,000 iterations and a cryptographically random salt to derive a key-encryption key (KEK). The SECP256R1 private key is encrypted with AES-256-GCM using this KEK before database persistence. Even with direct database access, an adversary cannot decrypt transfers without the user's password.
+      </div>
+    </details>
+
+    <details class="faq-item">
+      <summary class="faq-summary">How does the system detect tampering with encrypted files?</summary>
+      <div class="faq-content">
+        The system employs two independent layers of integrity protection: first, AES-256-GCM produces a 128-bit authentication tag that fails immediately if any ciphertext bit or nonce is altered. Second, a 256-bit SHA-256 cryptographic digest of the original file is recorded in the transfer record and re-verified byte-for-byte upon client decryption.
+      </div>
+    </details>
+  </div>
+</section>
+{% endblock %}

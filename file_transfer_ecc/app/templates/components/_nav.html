@@ -1,0 +1,38 @@
+<header class="app-header">
+  <div class="nav-container">
+    <!-- Brand Logo -->
+    <a href="{{ url_for('main.index') }}" class="brand-link">
+      <svg class="brand-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <span class="brand-text">ECC<span class="brand-accent">Transfer</span></span>
+      <span class="crypto-badge">P-256</span>
+    </a>
+
+    <!-- Nav Links (Conditional on authentication state) -->
+    <nav class="nav-menu">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('main.dashboard') }}" class="nav-link {% if request.path == '/dashboard' %}active{% endif %}">Dashboard</a>
+        <a href="/transfer/send" class="nav-link {% if request.path == '/transfer/send' %}active{% endif %}">Send File</a>
+        <a href="/transfer/inbox" class="nav-link {% if request.path == '/transfer/inbox' %}active{% endif %}">Inbox</a>
+        <a href="/transfer/history" class="nav-link {% if request.path == '/transfer/history' %}active{% endif %}">Audit Ledger</a>
+
+        <!-- User Menu Dropdown -->
+        <div class="user-profile-menu">
+          <button class="profile-trigger" id="profile-dropdown-btn" type="button">
+            <span class="avatar-circle">{{ current_user.username[0]|upper }}</span>
+            <span class="username-label">{{ current_user.username }}</span>
+          </button>
+          <div class="dropdown-panel" id="profile-dropdown-panel">
+            <a href="/profile" class="dropdown-item">Key & Profile</a>
+            <hr class="dropdown-divider">
+            <button id="logout-btn" type="button" class="dropdown-item logout-item">Logout</button>
+          </div>
+        </div>
+      {% else %}
+        <a href="/auth/login" class="nav-link">Log in</a>
+        <a href="/auth/register" class="btn btn-primary btn-sm">Sign up</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>

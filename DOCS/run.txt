@@ -1,0 +1,2 @@
+cd "c:\Users\pc\OneDrive\Desktop\FIle Transfer\file_transfer_ecc"
+.\venv\Scripts\python.exe run.py

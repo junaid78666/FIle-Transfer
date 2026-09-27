@@ -38,7 +38,10 @@ def clean_db(app):
         db.session.query(ECCKey).delete()
         db.session.query(User).delete()
         db.session.commit()
+        db.session.remove()
     yield
+    with app.app_context():
+        db.session.remove()
 
 
 # ── Helper ────────────────────────────────────────────────────
@@ -61,6 +64,10 @@ def login(client, email=None, password=None):
         "email": email or VALID_USER["email"],
         "password": password or VALID_USER["password"],
     })
+
+
+def logout(client):
+    client.post("/auth/logout")
 
 
 # ══════════════════════════════════════════════════════════════

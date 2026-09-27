@@ -12,7 +12,7 @@ Endpoints:
   GET  /users/list      → List all users except current user (for recipient selection)
 """
 
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, render_template, redirect, url_for
 from flask_login import login_user, logout_user, login_required, current_user
 
 from app.auth.forms import RegistrationForm, LoginForm
@@ -24,13 +24,14 @@ auth_bp = Blueprint("auth", __name__)
 
 
 # ══════════════════════════════════════════════════════════════
-# POST /auth/register
+# GET/POST /auth/register
 # ══════════════════════════════════════════════════════════════
 
-@auth_bp.route("/register", methods=["POST"])
+@auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     """
-    Register a new user account.
+    GET: Render registration page in browser.
+    POST: Register a new user account.
 
     Request (JSON or form-data):
         username, email, password, confirm_password
@@ -41,6 +42,10 @@ def register():
     Response 400:
         { "status": "error", "errors": [...] }
     """
+    if request.method == "GET":
+        if current_user.is_authenticated:
+            return redirect(url_for("main.dashboard"))
+        return render_template("auth/register.html")
     form = RegistrationForm(data=request.get_json(silent=True) or request.form)
 
     if not form.validate():
@@ -74,13 +79,14 @@ def register():
 
 
 # ══════════════════════════════════════════════════════════════
-# POST /auth/login
+# GET/POST /auth/login
 # ══════════════════════════════════════════════════════════════
 
-@auth_bp.route("/login", methods=["POST"])
+@auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     """
-    Authenticate a registered user and create a session.
+    GET: Render login page in browser.
+    POST: Authenticate a registered user and create a session.
 
     Request (JSON or form-data):
         email, password, remember_me (optional bool)
@@ -94,13 +100,10 @@ def login():
     Response 401 (wrong credentials):
         { "status": "error", "message": "..." }
     """
-    if current_user.is_authenticated:
-        return jsonify({
-            "status": "success",
-            "message": "Already logged in.",
-            "user": current_user.to_dict(),
-        }), 200
-
+    if request.method == "GET":
+        if current_user.is_authenticated:
+            return redirect(url_for("main.dashboard"))
+        return render_template("auth/login.html")
     form = LoginForm(data=request.get_json(silent=True) or request.form)
 
     if not form.validate():
@@ -117,6 +120,13 @@ def login():
             "status": "error",
             "message": "Invalid email or password. Please try again.",
         }), 401
+
+    # If already logged in as a different user (or same), log out first
+    try:
+        if current_user.is_authenticated:
+            logout_user()
+    except Exception:
+        pass
 
     # Create Flask-Login session
     remember = bool(form.remember_me.data)
@@ -209,25 +219,16 @@ def profile():
 
 
 # ══════════════════════════════════════════════════════════════
-# GET /users/list
+# GET /users/list and /auth/users
 # ══════════════════════════════════════════════════════════════
 
 @auth_bp.route("/users/list", methods=["GET"])
+@auth_bp.route("/users", methods=["GET"])
 @login_required
 def list_users():
     """
     Return all active users except the currently logged-in user.
     Used to populate the recipient dropdown on the Send File page.
-
-    Query Parameters:
-        search (optional): Filter by username prefix.
-
-    Response 200:
-        {
-            "status": "success",
-            "users": [ {"user_id": 2, "username": "bob"}, ... ],
-            "total": 5
-        }
     """
     search = request.args.get("search", "").strip()
 
@@ -243,6 +244,6 @@ def list_users():
 
     return jsonify({
         "status": "success",
-        "users": [{"user_id": u.id, "username": u.username} for u in users],
+        "users": [{"id": u.id, "user_id": u.id, "username": u.username, "email": u.email} for u in users],
         "total": len(users),
     }), 200

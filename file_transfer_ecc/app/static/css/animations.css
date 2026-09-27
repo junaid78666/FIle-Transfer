@@ -1,0 +1,145 @@
+/* ==========================================================================
+   app/static/css/animations.css — Smooth Page Transitions & Micro-Animations
+   ========================================================================== */
+
+/* Page Fade & Slide In */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(229, 50, 45, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(229, 50, 45, 0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Base Reveal Animation Classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.45s ease-out forwards;
+}
+
+/* Stagger Delays for Cards */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.12s; }
+.stagger-3 { animation-delay: 0.19s; }
+.stagger-4 { animation-delay: 0.26s; }
+.stagger-5 { animation-delay: 0.33s; }
+.stagger-6 { animation-delay: 0.40s; }
+
+/* Interactive Hover Animations */
+.card-hover-fx {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.28s ease;
+}
+
+.card-hover-fx:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
+  border-color: #CBD5E1;
+}
+
+/* Three.js Hero Canvas Styling */
+.three-canvas-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.85;
+}
+
+.three-canvas-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* Interactive 3D Visualizer Canvas Box */
+.interactive-three-box {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  background: #0F172A;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.16);
+  border: 1px solid #1E293B;
+  cursor: grab;
+}
+
+.interactive-three-box:active {
+  cursor: grabbing;
+}
+
+.interactive-three-box .visualizer-hint {
+  position: absolute;
+  bottom: 1rem;
+  right: 1.25rem;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94A3B8;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 500;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.interactive-three-box .visualizer-badge {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  background: rgba(229, 50, 45, 0.18);
+  border: 1px solid rgba(229, 50, 45, 0.4);
+  color: #FF6B6B;
+  padding: 0.35rem 0.8rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  z-index: 10;
+}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Create Account{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper animate-fade-in-up">
+  <div class="glass-card auth-card card-hover-fx">
+    <div class="auth-header">
+      <span class="crypto-badge">Keypair Generation</span>
+      <h2>Create ECC Account</h2>
+      <p>A 256-bit Elliptic Curve key pair will be generated automatically upon registration.</p>
+    </div>
+
+    <form id="register-form" class="auth-form" novalidate>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required placeholder="alice_crypto" autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" required placeholder="alice@example.com" autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required placeholder="••••••••••••" autocomplete="new-password">
+        <!-- Live Strength Meter -->
+        <div class="password-meter-container">
+          <div class="meter-bar" id="meter-bar"></div>
+        </div>
+        <span class="meter-label" id="meter-label">Password Strength: Empty</span>
+      </div>
+
+      <div class="form-group">
+        <label for="confirm_password">Confirm Password</label>
+        <input type="password" id="confirm_password" name="confirm_password" required placeholder="••••••••••••" autocomplete="new-password">
+      </div>
+
+      <div class="security-callout">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <span>Your password encrypts your ECC private key at rest using PBKDF2-HMAC-SHA256 (100k iterations).</span>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" id="register-submit-btn">
+        <span>Generate Keys & Create Account</span>
+      </button>
+
+      <div class="auth-footer-link">
+        Already have an account? <a href="/auth/login">Sign in</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

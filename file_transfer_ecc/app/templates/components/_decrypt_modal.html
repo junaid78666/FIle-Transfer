@@ -1,0 +1,40 @@
+<div class="modal-overlay hidden" id="decrypt-modal-overlay">
+  <div class="glass-card modal-container">
+    <div class="modal-header">
+      <div class="modal-icon-badge">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <div>
+        <h3>Unlock Private Key & Decrypt</h3>
+        <p class="modal-sub" id="decrypt-modal-filename">document.pdf</p>
+      </div>
+      <button class="modal-close-btn" id="btn-close-decrypt-modal" type="button">&times;</button>
+    </div>
+
+    <form id="decrypt-form" class="modal-form">
+      <input type="hidden" id="decrypt-transfer-id" value="">
+
+      <div class="security-callout" style="margin-bottom: 1.25rem;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <span>Your account password unlocks your ECC private key in memory to compute the ECDH shared secret and decrypt the AES-256-GCM session key.</span>
+      </div>
+
+      <div class="form-group">
+        <label for="decrypt-password">Account Password</label>
+        <input type="password" id="decrypt-password" name="password" required placeholder="Enter password to unlock private key" autocomplete="current-password">
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-decrypt">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-decrypt">
+          <span>Decrypt & Download</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

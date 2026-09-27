@@ -40,7 +40,10 @@ def clean_db(app):
         db.session.query(ECCKey).delete()
         db.session.query(User).delete()
         db.session.commit()
+        db.session.remove()
     yield
+    with app.app_context():
+        db.session.remove()
 
 
 # ── Helpers ───────────────────────────────────────────────────
@@ -200,7 +203,7 @@ class TestDownloadFile:
         login_as(client, ALICE["email"])
         bob_id = get_user_id(app, BOB["email"])
         content = b"Top secret document content."
-        client.post(
+        resp = client.post(
             "/transfer/send",
             data={
                 "file": (io.BytesIO(content), "secret.txt"),
@@ -209,8 +212,8 @@ class TestDownloadFile:
             content_type="multipart/form-data",
         )
         logout(client)  # Always log out after sending
-        with app.app_context():
-            return Transfer.query.first().id, content
+        transfer_id = resp.get_json()["transfer"]["transfer_id"]
+        return transfer_id, content
 
     def test_receiver_can_download(self, app, client):
         """Receiver successfully downloads and decrypts the file."""
@@ -235,7 +238,7 @@ class TestDownloadFile:
         )
 
         with app.app_context():
-            transfer = Transfer.query.get(transfer_id)
+            transfer = db.session.get(Transfer, transfer_id)
             assert transfer.status == TransferStatus.DOWNLOADED
             assert transfer.downloaded_at is not None
 
@@ -387,14 +390,13 @@ class TestTransferManagement:
         register_user(client, BOB)
         login_as(client, ALICE["email"])
         bob_id = get_user_id(app, BOB["email"])
-        client.post(
+        resp = client.post(
             "/transfer/send",
             data={**make_file_data(), "receiver_id": bob_id},
             content_type="multipart/form-data",
         )
         logout(client)  # Ensure clean state
-        with app.app_context():
-            return Transfer.query.first().id
+        return resp.get_json()["transfer"]["transfer_id"]
 
     def test_sender_can_view_transfer_info(self, app, client):
         """Sender can view transfer metadata."""

@@ -23,7 +23,7 @@ import os
 
 from flask import (
     Blueprint, request, jsonify, current_app,
-    send_file, abort,
+    send_file, abort, render_template,
 )
 from flask_login import login_required, current_user
 
@@ -44,27 +44,28 @@ from app.crypto.hashing import IntegrityError
 transfer_bp = Blueprint("transfer", __name__)
 
 
+def wants_html():
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return False
+    if "application/json" in request.headers.get("Accept", ""):
+        return False
+    return request.accept_mimetypes.accept_html and not request.is_json
+
+
 # ══════════════════════════════════════════════════════════════
 # POST /transfer/send
 # ══════════════════════════════════════════════════════════════
 
-@transfer_bp.route("/send", methods=["POST"])
+@transfer_bp.route("/send", methods=["GET", "POST"])
 @login_required
 def send_file_transfer():
     """
-    Upload a file, encrypt it, and create a secure transfer for a recipient.
-
-    Request: multipart/form-data
-        file        → File upload field
-        receiver_id → ID of recipient user
-
-    Response 201:
-        { "status": "success", "message": "...", "transfer": {...} }
-
-    Response 400: Validation error
-    Response 403: Receiver not found or self-transfer
-    Response 500: Encryption or storage error
+    GET: Render send file page in browser.
+    POST: Upload a file, encrypt it, and create a secure transfer for a recipient.
     """
+    if request.method == "GET":
+        return render_template("transfer/send.html")
+
     form = SendFileForm()
 
     if not form.validate_on_submit():
@@ -307,22 +308,9 @@ def download_file(transfer_id: str):
 def inbox():
     """
     Return all transfers received by the current user.
-
-    Query Parameters:
-        page     (int, default=1):    Page number.
-        per_page (int, default=10):   Items per page.
-        status   (str, optional):     Filter by status (PENDING/DOWNLOADED/FAILED).
-
-    Response 200:
-        {
-            "status": "success",
-            "transfers": [...],
-            "total": 5,
-            "page": 1,
-            "pages": 1,
-            "unread_count": 3
-        }
     """
+    if wants_html():
+        return render_template("transfer/inbox.html")
     page = request.args.get("page", 1, type=int)
     per_page = min(request.args.get("per_page", 10, type=int), 50)
     status_filter = request.args.get("status", "").upper()
@@ -397,22 +385,9 @@ def sent():
 def history():
     """
     Return combined sent and received transfer history for the current user.
-
-    Query Parameters:
-        page       (int):    Page number (default=1).
-        per_page   (int):    Items per page (default=10, max=50).
-        direction  (str):    "sent" | "received" | "all" (default="all").
-        status     (str):    "PENDING" | "DOWNLOADED" | "FAILED" | "" (all).
-
-    Response 200:
-        {
-            "status": "success",
-            "transfers": [...],
-            "total": N,
-            "page": N,
-            "pages": N
-        }
     """
+    if wants_html():
+        return render_template("transfer/history.html")
     page = request.args.get("page", 1, type=int)
     per_page = min(request.args.get("per_page", 10, type=int), 50)
     direction = request.args.get("direction", "all").lower()

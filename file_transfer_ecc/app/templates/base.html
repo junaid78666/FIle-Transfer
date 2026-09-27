@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() if csrf_token is defined else '' }}">
+  <title>{% block title %}ECC Secure File Transfer{% endblock %} | Hybrid Cryptography</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Core CSS Bundles -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/animations.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <!-- Header / Navigation -->
+  {% include 'components/_nav.html' %}
+
+  <!-- Global Toast Notification Viewport -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Main Content Body -->
+  <main class="main-container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Global Decryption Modal -->
+  {% include 'components/_decrypt_modal.html' %}
+
+  <!-- Application Footer -->
+  {% include 'components/_footer.html' %}
+
+  <!-- Core JavaScript Libraries -->
+  <script type="module" src="{{ url_for('static', filename='js/api.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='js/toast.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='js/clipboard.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='js/decrypt-modal.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <!-- Three.js 3D Graphics Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script type="module" src="{{ url_for('static', filename='js/three-background.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

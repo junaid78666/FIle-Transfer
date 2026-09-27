@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+  <!-- Top Welcome Header -->
+  <div class="dashboard-header animate-fade-in-up">
+    <div>
+      <h1 class="welcome-heading">Welcome back, <span class="gradient-text">{{ current_user.username }}</span></h1>
+      <p class="welcome-sub">Cryptographic vault operational • Curve: NIST P-256</p>
+    </div>
+    <div class="dashboard-cta">
+      <a href="/transfer/send" class="btn btn-primary">Send Encrypted File</a>
+    </div>
+  </div>
+
+  <!-- Metric Counters Grid -->
+  <div class="metrics-grid">
+    <div class="glass-card metric-card card-hover-fx animate-fade-in-up stagger-1">
+      <div class="metric-icon-box warning">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <div>
+        <div class="metric-value" id="stat-pending">-</div>
+        <div class="metric-label">Pending Decryption</div>
+      </div>
+    </div>
+
+    <div class="glass-card metric-card card-hover-fx animate-fade-in-up stagger-2">
+      <div class="metric-icon-box cyan">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <div>
+        <div class="metric-value" id="stat-received">-</div>
+        <div class="metric-label">Total Received</div>
+      </div>
+    </div>
+
+    <div class="glass-card metric-card card-hover-fx animate-fade-in-up stagger-3">
+      <div class="metric-icon-box indigo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="metric-value" id="stat-sent">-</div>
+        <div class="metric-label">Total Sent</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Sections -->
+  <div class="dashboard-tables-grid">
+    <!-- Inbound Files Awaiting Decryption -->
+    <div class="glass-card section-card card-hover-fx animate-fade-in-up stagger-4">
+      <div class="card-header-flex">
+        <h3>Incoming Files Requiring Action</h3>
+        <a href="/transfer/inbox" class="card-link">View All Inbox</a>
+      </div>
+
+      <div class="transfer-list" id="pending-transfer-list">
+        <div class="skeleton-row">Loading pending cryptographic transfers...</div>
+      </div>
+    </div>
+
+    <!-- Active Cryptographic Parameters & Health -->
+    <div class="glass-card section-card card-hover-fx animate-fade-in-up stagger-5">
+      <div class="card-header-flex">
+        <h3>Cryptographic Engine Telemetry</h3>
+        <span class="crypto-badge">Hardware Protected</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #F1F5F9; padding-bottom: 0.75rem;">
+          <span style="font-size: 0.9rem; color: #64748B;">Asymmetric Curve</span>
+          <code style="font-family: var(--font-mono); font-size: 0.85rem; background: #F8FAFC; padding: 0.2rem 0.5rem; border-radius: 4px;">NIST P-256 (secp256r1)</code>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #F1F5F9; padding-bottom: 0.75rem;">
+          <span style="font-size: 0.9rem; color: #64748B;">Symmetric Cipher</span>
+          <code style="font-family: var(--font-mono); font-size: 0.85rem; background: #F8FAFC; padding: 0.2rem 0.5rem; border-radius: 4px;">AES-256-GCM (128-bit Tag)</code>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #F1F5F9; padding-bottom: 0.75rem;">
+          <span style="font-size: 0.9rem; color: #64748B;">Key Derivation</span>
+          <code style="font-family: var(--font-mono); font-size: 0.85rem; background: #F8FAFC; padding: 0.2rem 0.5rem; border-radius: 4px;">HKDF-SHA256 (RFC 5869)</code>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #F1F5F9; padding-bottom: 0.75rem;">
+          <span style="font-size: 0.9rem; color: #64748B;">Private Key Storage</span>
+          <span style="font-size: 0.82rem; font-weight: 600; color: #059669; background: #ECFDF5; padding: 0.25rem 0.6rem; border-radius: 9999px;">PBKDF2 Encrypted (100k)</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.9rem; color: #64748B;">Integrity Verification</span>
+          <span style="font-size: 0.82rem; font-weight: 600; color: #0284C7; background: #F0F9FF; padding: 0.25rem 0.6rem; border-radius: 9999px;">SHA-256 Checksum Audit</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

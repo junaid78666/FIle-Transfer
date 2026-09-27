@@ -1,0 +1,109 @@
+/* ==========================================================================
+   app/static/css/pages/auth.css — Clean Light Auth Styling
+   ========================================================================== */
+
+.auth-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 220px);
+  padding: 2.5rem 1rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 3rem 2.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2.25rem;
+}
+
+.auth-header .crypto-badge {
+  margin-bottom: 1rem;
+}
+
+.auth-header h2 {
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.auth-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Password Strength Meter */
+.password-meter-container {
+  height: 6px;
+  background: #E2E8F0;
+  border-radius: var(--radius-full);
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.meter-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.meter-label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+  font-weight: 600;
+}
+
+/* Security Callout Box */
+.security-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--primary-subtle);
+  border: 1px solid rgba(229, 50, 45, 0.2);
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.45;
+  margin-bottom: 1.5rem;
+}
+
+.security-callout svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.auth-footer-link {
+  text-align: center;
+  margin-top: 1.75rem;
+  font-size: 0.925rem;
+  color: var(--text-secondary);
+}
+
+.auth-footer-link a {
+  color: var(--primary);
+  font-weight: 700;
+}
+.auth-footer-link a:hover {
+  text-decoration: underline;
+}

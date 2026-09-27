@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}Secure Inbox{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/transfer.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="history-page-container">
+  <div class="page-title-row">
+    <div>
+      <h2>Secure Inbound Transfers</h2>
+      <p class="subtitle">All encrypted files addressed to your public key. Decrypt with your password on demand.</p>
+    </div>
+    <div class="dashboard-cta">
+      <a href="/transfer/send" class="btn btn-secondary btn-sm">+ Send a File</a>
+    </div>
+  </div>
+
+  <div class="glass-card table-card">
+    <table class="data-table" id="inbox-table">
+      <thead>
+        <tr>
+          <th>File Details</th>
+          <th>Sender</th>
+          <th>SHA-256 Checksum</th>
+          <th>Date Sent</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="inbox-table-body">
+        <tr><td colspan="6" class="loading-td">Loading secure inbox...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+  import { apiRequest } from "{{ url_for('static', filename='js/api.js') }}";
+  import { openDecryptModal } from "{{ url_for('static', filename='js/decrypt-modal.js') }}";
+  import { initClipboardButtons } from "{{ url_for('static', filename='js/clipboard.js') }}";
+
+  async function loadInbox() {
+    const tbody = document.getElementById('inbox-table-body');
+    try {
+      const resp = await apiRequest('/transfer/inbox');
+      const data = await resp.json();
+
+      if (resp.ok && data.status === 'success') {
+        const transfers = data.transfers;
+        if (transfers.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="empty-td">Your inbox is empty. No files received yet.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = transfers.map(t => {
+          const shortHash = t.sha256_hash ? `${t.sha256_hash.substring(0, 8)}...${t.sha256_hash.substring(56)}` : 'N/A';
+          const isPending = t.status === 'PENDING';
+          return `
+            <tr>
+              <td>
+                <div class="file-name-cell">${escapeHtml(t.original_filename)}</div>
+                <div class="file-sub-cell">${(t.file_size_bytes / 1024).toFixed(1)} KB</div>
+              </td>
+              <td>${escapeHtml(t.sender_username)}</td>
+              <td>
+                <code class="hash-code" data-copy="${t.sha256_hash}" title="Click to copy SHA-256">${shortHash}</code>
+              </td>
+              <td>${new Date(t.sent_at).toLocaleDateString()}</td>
+              <td>
+                <span class="status-pill ${t.status.toLowerCase()}">${t.status}</span>
+              </td>
+              <td>
+                <button class="btn ${isPending ? 'btn-primary' : 'btn-secondary'} btn-xs decrypt-btn" data-id="${t.transfer_id}" data-filename="${t.original_filename}">
+                  ${isPending ? 'Decrypt & Download' : 'Download Again'}
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        tbody.querySelectorAll('.decrypt-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            openDecryptModal(btn.getAttribute('data-id'), btn.getAttribute('data-filename'));
+          });
+        });
+
+        initClipboardButtons();
+      }
+    } catch (err) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-td text-danger">Failed to load inbox.</td></tr>';
+    }
+  }
+
+  function escapeHtml(str) {
+    const p = document.createElement('p');
+    p.textContent = str;
+    return p.innerHTML;
+  }
+
+  document.addEventListener('DOMContentLoaded', loadInbox);
+</script>
+{% endblock %}

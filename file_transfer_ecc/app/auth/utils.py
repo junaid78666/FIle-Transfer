@@ -102,7 +102,7 @@ def authenticate_user(email: str, password: str) -> Optional[User]:
     if user is None:
         # Run a dummy hash check to prevent timing attacks
         bcrypt.check_password_hash(
-            "$2b$12$dummyhashfordummypasswordcheck.123456789012", password
+            "$2b$12$/39k9qGg6mgVYp7Uy1NQNus4NxvSFNMhWEB4aGrIL/2a7o0PDxzdS", password
         )
         return None
 

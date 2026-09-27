@@ -1,0 +1,431 @@
+/* ==========================================================================
+   app/static/css/pages/landing.css — Landing Page & Tool Cards
+   ========================================================================== */
+
+.hero-section {
+  position: relative;
+  text-align: center;
+  padding: 5rem 1rem 4rem;
+}
+
+.hero-content {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.hero-badge {
+  margin-bottom: 1.5rem;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 10px var(--primary);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.hero-title {
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+}
+
+.hero-description {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 2.75rem;
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+/* Tool Grid */
+.features-section {
+  padding: 3rem 0 5rem;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.section-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.75rem;
+}
+
+.feature-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  padding: 2.25rem 1.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.09);
+  border-color: rgba(229, 50, 45, 0.4);
+}
+
+.feature-icon-wrapper {
+  width: 58px;
+  height: 58px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.feature-icon-wrapper.red {
+  background: var(--primary-subtle);
+  color: var(--primary);
+}
+
+.feature-icon-wrapper.blue {
+  background: var(--accent-cyan-subtle);
+  color: var(--accent-cyan);
+}
+
+.feature-icon-wrapper.emerald {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.feature-icon-wrapper.amber {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.feature-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+
+.feature-card p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   3D Elliptic Curve Interactive Section
+   ══════════════════════════════════════════════════════════════ */
+.visualizer-section {
+  padding: 4rem 0 5rem;
+}
+
+.visualizer-split-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .visualizer-split-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.visualizer-info-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  padding: 2.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.visualizer-info-card h3 {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.visualizer-info-card p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.curve-points-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.legend-dot.red { background: #E5322D; }
+.legend-dot.cyan { background: #38BDF8; }
+.legend-dot.green { background: #10B981; }
+
+.param-box {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   4-Stage Protocol Architecture
+   ══════════════════════════════════════════════════════════════ */
+.protocol-section {
+  padding: 4rem 0 5rem;
+  background: #FFFFFF;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  margin: 2rem -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.protocol-timeline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+
+.protocol-step-card {
+  background: #FAFAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-md);
+  padding: 2rem 1.5rem;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.protocol-step-card:hover {
+  transform: translateY(-4px);
+  border-color: #CBD5E1;
+  background: #FFFFFF;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.step-number {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #E2E8F0;
+  font-family: var(--font-mono);
+}
+
+.step-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.protocol-step-card h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.protocol-step-card p {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Comparison Table Section
+   ══════════════════════════════════════════════════════════════ */
+.comparison-section {
+  padding: 4rem 0 5rem;
+}
+
+.table-responsive-box {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-card);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.crypto-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #FFFFFF;
+  text-align: left;
+}
+
+.crypto-comparison-table th {
+  background: #F8FAFC;
+  padding: 1.1rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.crypto-comparison-table td {
+  padding: 1.15rem 1.25rem;
+  font-size: 0.92rem;
+  color: #334155;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.crypto-comparison-table tr:hover td {
+  background: #FAFAFC;
+}
+
+.crypto-comparison-table tr.highlight-row td {
+  background: rgba(229, 50, 45, 0.03);
+  font-weight: 600;
+}
+
+.crypto-comparison-table tr.highlight-row td:first-child {
+  color: var(--primary);
+}
+
+.efficiency-tag {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.efficiency-tag.best {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+}
+
+.efficiency-tag.standard {
+  background: rgba(2, 132, 199, 0.1);
+  color: #0284C7;
+}
+
+.efficiency-tag.slow {
+  background: rgba(245, 158, 11, 0.12);
+  color: #D97706;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Academic FAQ Accordion
+   ══════════════════════════════════════════════════════════════ */
+.faq-section {
+  padding: 4rem 0 5rem;
+}
+
+.faq-list {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.faq-item {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+  transition: border-color var(--transition-fast);
+}
+
+.faq-item:hover {
+  border-color: #CBD5E1;
+}
+
+.faq-summary {
+  padding: 1.25rem 1.5rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  color: var(--text-primary);
+}
+
+.faq-summary::after {
+  content: '+';
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--primary);
+  transition: transform 0.2s ease;
+}
+
+details[open] .faq-summary::after {
+  transform: rotate(45deg);
+}
+
+.faq-content {
+  padding: 0 1.5rem 1.35rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}

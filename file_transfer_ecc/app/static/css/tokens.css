@@ -1,0 +1,70 @@
+/* ==========================================================================
+   app/static/css/tokens.css — Modern Clean Light Design Tokens
+   ========================================================================== */
+
+:root {
+  /* Surfaces & Canvas (Clean Light Theme) */
+  --bg-base:              #F4F5F8;   /* Soft warm neutral light canvas */
+  --bg-surface:           #FFFFFF;   /* Pure white card and container surface */
+  --bg-surface-elevated:  #FFFFFF;   /* Modals, popovers, elevated surfaces */
+  --bg-surface-subtle:    #EDF2F7;   /* Hover pills, subtle divider backgrounds */
+  --bg-glass:             rgba(255, 255, 255, 0.92);
+
+  /* Primary Brand: Signature Crimson Red */
+  --primary:              #E5322D;   /* Vibrant Crimson Red */
+  --primary-hover:        #D02420;   /* Deep crimson hover */
+  --primary-active:       #B81D1A;   /* Pressed state */
+  --primary-light:        #FF4B4B;   /* Bright red accent */
+  --primary-subtle:       rgba(229, 50, 45, 0.08); /* Soft red badge background */
+  --primary-glow:         rgba(229, 50, 45, 0.28); /* Big CTA button drop-shadow */
+
+  /* Cryptographic & Secondary Accents */
+  --accent-cyan:          #0284C7;   /* Sky/Cyan for crypto tags */
+  --accent-cyan-subtle:   rgba(2, 132, 199, 0.08);
+  --accent-navy:          #1E293B;   /* Slate/Navy for secondary elements */
+
+  /* Semantic Feedback Tokens */
+  --success:              #10B981;   /* Emerald */
+  --success-bg:           rgba(16, 185, 129, 0.1);
+  --success-border:       rgba(16, 185, 129, 0.25);
+  --warning:              #D97706;   /* Amber / Orange */
+  --warning-bg:           rgba(217, 119, 6, 0.1);
+  --warning-border:       rgba(217, 119, 6, 0.25);
+  --danger:               #E5322D;   /* Red */
+  --danger-bg:            rgba(229, 50, 45, 0.1);
+  --danger-border:        rgba(229, 50, 45, 0.25);
+  --info:                 #2563EB;   /* Blue */
+
+  /* High-Contrast Typography */
+  --text-primary:         #1E232A;   /* Crisp near-black charcoal */
+  --text-secondary:       #4A5568;   /* Slate 600 - comfortable reading */
+  --text-muted:           #718096;   /* Slate 500 - subtext and captions */
+  --text-inverse:         #FFFFFF;   /* White text on dark/red surfaces */
+
+  /* Borders & Dividers */
+  --border-subtle:        #E2E8F0;   /* Light gray clean border */
+  --border-card:          #E2E8F0;   /* Card perimeter border */
+  --border-focus:         #E5322D;   /* Focus outline red */
+  --glass-border:         rgba(0, 0, 0, 0.06);
+
+  /* Typography Font Families */
+  --font-sans:            'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:            'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+  /* Border Radii */
+  --radius-xs:            6px;
+  --radius-sm:            8px;
+  --radius-md:            12px;
+  --radius-lg:            20px;
+  --radius-full:          9999px;
+
+  /* Elevation & Shadows */
+  --shadow-sm:            0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md:            0 4px 14px rgba(0, 0, 0, 0.07);
+  --shadow-lg:            0 12px 28px rgba(0, 0, 0, 0.1);
+  --shadow-primary:       0 8px 24px rgba(229, 50, 45, 0.32); /* Iconic red button shadow */
+
+  /* Transitions */
+  --transition-fast:      0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth:    0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}

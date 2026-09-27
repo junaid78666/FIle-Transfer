@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Cryptographic Profile & Keys{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container animate-fade-in-up">
+  <div class="glass-card profile-card card-hover-fx">
+    <div class="profile-header-row">
+      <div class="avatar-large">{{ current_user.username[0]|upper }}</div>
+      <div>
+        <h2>{{ current_user.username }}</h2>
+        <p class="profile-email">{{ current_user.email }}</p>
+      </div>
+      <span class="crypto-badge" style="margin-left: auto;">NIST P-256 (SECP256R1)</span>
+    </div>
+
+    <hr class="profile-divider">
+
+    <div class="key-section">
+      <div class="key-header">
+        <h3>Public Key (PEM Encoded)</h3>
+        <button class="btn btn-secondary btn-sm" id="btn-copy-pubkey" data-copy="{{ current_user.ecc_key.public_key_pem if current_user.ecc_key else '' }}">
+          Copy Public Key
+        </button>
+      </div>
+
+      <textarea class="pem-display" readonly rows="7">{{ current_user.ecc_key.public_key_pem if current_user.ecc_key else 'Public key not generated' }}</textarea>
+    </div>
+
+    <div class="security-meta-grid">
+      <div class="meta-item">
+        <label>Key Fingerprint (SHA-256)</label>
+        <code class="hash-code" data-copy="{{ current_user.ecc_key.fingerprint if current_user.ecc_key else '' }}" title="Click to copy fingerprint">
+          {{ current_user.ecc_key.fingerprint if current_user.ecc_key else 'N/A' }}
+        </code>
+      </div>
+      <div class="meta-item">
+        <label>Private Key Protection</label>
+        <span class="shield-badge">AES-256-GCM + PBKDF2 (100,000 iterations)</span>
+      </div>
+    </div>
+
+    <hr class="profile-divider">
+
+    <div style="margin-top: 1.5rem;">
+      <h3 style="font-size: 1.05rem; font-weight: 700; color: #1E293B; margin-bottom: 0.85rem;">Cryptographic Profile Standards</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; font-size: 0.82rem; color: #475569;">
+        <div style="background: #F8FAFC; padding: 0.85rem; border-radius: 6px; border: 1px solid #E2E8F0;">
+          <strong>Curve OID:</strong> 1.2.840.10045.3.1.7<br>
+          <span style="color: #64748B;">SECG prime256v1 / NIST P-256</span>
+        </div>
+        <div style="background: #F8FAFC; padding: 0.85rem; border-radius: 6px; border: 1px solid #E2E8F0;">
+          <strong>Security Level:</strong> 128-bit Symmetric<br>
+          <span style="color: #64748B;">Equivalent to RSA-3072 key size</span>
+        </div>
+        <div style="background: #F8FAFC; padding: 0.85rem; border-radius: 6px; border: 1px solid #E2E8F0;">
+          <strong>Key Derivation:</strong> PBKDF2-HMAC-SHA256<br>
+          <span style="color: #64748B;">100,000 rounds + 16-byte secure salt</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

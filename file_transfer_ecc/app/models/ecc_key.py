@@ -99,6 +99,17 @@ class ECCKey(db.Model):
     def __repr__(self) -> str:
         return f"<ECCKey id={self.id} user_id={self.user_id} curve='{self.curve}'>"
 
+    @property
+    def public_key_pem(self) -> str:
+        """Alias for public_key."""
+        return self.public_key
+
+    @property
+    def fingerprint(self) -> str:
+        """SHA-256 fingerprint of the public key."""
+        from app.crypto.hashing import compute_sha256
+        return compute_sha256(self.public_key.encode("utf-8"))[:32]
+
     def to_dict(self, include_public_key: bool = True) -> dict:
         """
         Serialize ECC key info (public key only; never private key).
@@ -113,6 +124,7 @@ class ECCKey(db.Model):
             "key_id": self.id,
             "user_id": self.user_id,
             "curve": self.curve,
+            "fingerprint": self.fingerprint,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
         if include_public_key:

@@ -81,7 +81,13 @@ def create_app(config_name: str = None) -> Flask:
     @login_manager.user_loader
     def load_user(user_id: str):
         """Load user by ID for Flask-Login session management."""
-        return User.query.get(int(user_id))
+        try:
+            user = db.session.get(User, int(user_id))
+            if user is not None and user.is_active:
+                return user
+        except Exception:
+            db.session.rollback()
+        return None
 
     # ── Register Blueprints ───────────────────────────────────
     _register_blueprints(app)

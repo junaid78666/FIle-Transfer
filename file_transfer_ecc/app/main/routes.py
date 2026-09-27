@@ -8,21 +8,29 @@ Endpoints:
   GET  /dashboard → Current user dashboard data (stats + recent transfers)
 """
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, render_template, request
 from flask_login import login_required, current_user
 from app.models.transfer import Transfer, TransferStatus
 
 main_bp = Blueprint("main", __name__)
 
 
+def wants_html():
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return False
+    if "application/json" in request.headers.get("Accept", ""):
+        return False
+    return request.accept_mimetypes.accept_html and not request.is_json
+
+
 @main_bp.route("/", methods=["GET"])
 def index():
     """
-    Root endpoint — health check / API info.
-
-    Response 200:
-        { "status": "ok", "app": "File Transfer ECC", "version": "1.0" }
+    Root endpoint — Landing page in browser, API info in JSON.
     """
+    if wants_html():
+        return render_template("index.html")
+
     return jsonify({
         "status": "ok",
         "app": "File Transfer System Using ECC",
@@ -47,21 +55,11 @@ def index():
 @login_required
 def dashboard():
     """
-    Return dashboard data for the current user:
-      - User info
-      - Transfer statistics
-      - 5 most recent received transfers
-      - 5 most recent sent transfers
-
-    Response 200:
-        {
-            "status": "success",
-            "user": {...},
-            "stats": {...},
-            "recent_received": [...],
-            "recent_sent": [...]
-        }
+    Return dashboard page in browser, or JSON data for API clients.
     """
+    if wants_html():
+        return render_template("dashboard/index.html")
+
     # Transfer stats
     stats = {
         "total_sent": Transfer.query.filter_by(sender_id=current_user.id).count(),
@@ -97,6 +95,13 @@ def dashboard():
         "recent_received": [t.to_dict() for t in recent_received],
         "recent_sent": [t.to_dict() for t in recent_sent],
     }), 200
+
+
+@main_bp.route("/profile", methods=["GET"])
+@login_required
+def profile():
+    """Render the user's cryptographic profile and public key inspector."""
+    return render_template("profile/index.html")
 
 
 @main_bp.route("/health", methods=["GET"])

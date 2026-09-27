@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Send Encrypted File{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/transfer.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="transfer-page-wrapper">
+  <div class="transfer-card-main card-hover-fx animate-fade-in-up">
+    <div class="transfer-card-header">
+      <span class="crypto-badge">AES-256-GCM + ECIES</span>
+      <h2>Send Encrypted File</h2>
+      <p>Select a recipient and upload your file. AES-256-GCM protects the data; ECC NIST P-256 wraps the key.</p>
+    </div>
+
+    <form id="send-file-form" novalidate>
+      <!-- Recipient Selection Box -->
+      <div class="recipient-selection-box">
+        <label for="receiver_id">1. Choose Recipient</label>
+        <select id="receiver_id" name="receiver_id" required>
+          <option value="">-- Select registered user --</option>
+        </select>
+        <div id="recipient-key-indicator" class="key-status-box hidden">
+          <span class="key-dot"></span>
+          <span>Verified NIST P-256 Public Key loaded</span>
+        </div>
+      </div>
+
+      <!-- Centered File Dropzone -->
+      <div id="dropzone" class="dropzone">
+        <input type="file" id="file-input" class="file-input-hidden" required>
+        
+        <div class="dropzone-idle-content" id="dropzone-idle-content">
+          <button type="button" class="btn-select-file" id="btn-browse-trigger">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <span>Select file</span>
+          </button>
+          <p class="dropzone-subtext">or drop file here</p>
+          <p class="dropzone-limits">Any format supported • Max file size: 50 MB</p>
+        </div>
+
+        <!-- Staged File Card -->
+        <div class="dropzone-staged-file hidden" id="dropzone-staged-content">
+          <div class="staged-meta">
+            <span class="staged-name" id="staged-file-name">document.pdf</span>
+            <span class="staged-size" id="staged-file-size">4.2 MB</span>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-remove-file">Change File</button>
+        </div>
+      </div>
+
+      <!-- Live Encryption & Transmission Progress -->
+      <div id="progress-container" class="progress-box hidden">
+        <div class="progress-label-row">
+          <span id="progress-stage-label">Encrypting & Streaming Payload...</span>
+          <span id="progress-percentage">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-submit-transfer">
+        <span>Encrypt & Send File</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Security Protocol Summary Box -->
+  <div class="glass-card animate-fade-in-up stagger-2" style="margin-top: 1.5rem; padding: 1.5rem; border-radius: var(--radius-md);">
+    <h4 style="font-size: 0.95rem; font-weight: 700; color: #1E293B; margin-bottom: 0.75rem;">Guaranteed End-to-End Cryptographic Security</h4>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.82rem; color: #64748B;">
+      <div>
+        <strong style="color: #334155;">1. NIST P-256 ECIES</strong><br>
+        Session key is wrapped directly with recipient's public curve coordinates.
+      </div>
+      <div>
+        <strong style="color: #334155;">2. AES-256-GCM</strong><br>
+        Payload encrypted with random 256-bit key and 96-bit nonce.
+      </div>
+      <div>
+        <strong style="color: #334155;">3. SHA-256 Hash</strong><br>
+        Cryptographic digest calculated for tamper detection before transmission.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{{ url_for('static', filename='js/dropzone.js') }}"></script>
+{% endblock %}
