@@ -1,0 +1,36 @@
+# ─────────────────────────────────────────────────────────────
+#  File Transfer System Using ECC  –  Python Dependencies
+# ─────────────────────────────────────────────────────────────
+
+# Web Framework
+Flask==3.0.3
+Flask-Login==0.6.3
+Flask-WTF==1.2.1
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.7
+
+# Forms & Validation
+WTForms==3.1.2
+email-validator==2.1.1
+
+# Cryptography
+cryptography==42.0.8
+
+# Password Hashing
+bcrypt==4.1.3
+Flask-Bcrypt==1.0.1
+
+# Utilities
+python-dotenv==1.0.1
+Werkzeug==3.0.3
+
+# File type detection
+python-magic-bin==0.4.14; sys_platform == "win32"
+python-magic==0.4.27; sys_platform != "win32"
+
+# Testing
+pytest==8.2.2
+pytest-flask==1.3.0
+
+# Database (optional MySQL driver)
+# PyMySQL==1.1.0
