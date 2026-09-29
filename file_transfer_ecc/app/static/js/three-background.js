@@ -12,130 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  initHeroBackground();
   initInteractiveCurveExplorer();
 });
 
 /**
- * 1. Hero Ambient Background
- * Floating cryptographic lattice of NIST P-256 discrete points
+ * 1. Hero Ambient Background (delegated to GSAP hero-gsap.js)
  */
 function initHeroBackground() {
-  const container = document.getElementById('hero-three-container');
-  if (!container) return;
-
-  const width = container.clientWidth || window.innerWidth;
-  const height = container.clientHeight || 500;
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 1000);
-  camera.position.z = 85;
-
-  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-  renderer.setSize(width, height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  container.appendChild(renderer.domElement);
-
-  // Generate cryptographic points based on elliptic curve parametric equations
-  const particleCount = 280;
-  const geometry = new THREE.BufferGeometry();
-  const positions = new Float32Array(particleCount * 3);
-  const colors = new Float32Array(particleCount * 3);
-
-  // Primary palette: Crimson Red (#E5322D), Sky Blue (#0284C7), Soft Slate (#94A3B8)
-  const colorRed = new THREE.Color(0xE5322D);
-  const colorBlue = new THREE.Color(0x0284C7);
-  const colorSlate = new THREE.Color(0x94A3B8);
-
-  for (let i = 0; i < particleCount; i++) {
-    const t = (i / particleCount) * Math.PI * 4;
-    // Parametric 3D curve: Weierstraß-inspired spiral in projective space
-    const x = Math.sin(t * 1.5) * 45 + (Math.random() - 0.5) * 12;
-    const y = Math.cos(t * 1.2) * 25 + (Math.random() - 0.5) * 10;
-    const z = (Math.sin(t * 2) * 35) + (Math.random() - 0.5) * 12;
-
-    positions[i * 3] = x;
-    positions[i * 3 + 1] = y;
-    positions[i * 3 + 2] = z;
-
-    // Distribute colors across cryptographic nodes
-    const mixColor = i % 3 === 0 ? colorRed : (i % 3 === 1 ? colorBlue : colorSlate);
-    colors[i * 3] = mixColor.r;
-    colors[i * 3 + 1] = mixColor.g;
-    colors[i * 3 + 2] = mixColor.b;
-  }
-
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-  // Particle Material
-  const pMaterial = new THREE.PointsMaterial({
-    size: 2.4,
-    vertexColors: true,
-    transparent: true,
-    opacity: 0.65,
-  });
-
-  const particleSystem = new THREE.Points(geometry, pMaterial);
-  scene.add(particleSystem);
-
-  // Connect close points with subtle dynamic lattice lines
-  const lineMaterial = new THREE.LineBasicMaterial({
-    color: 0xE2E8F0,
-    transparent: true,
-    opacity: 0.35,
-  });
-
-  const lineGeo = new THREE.BufferGeometry();
-  const linePositions = [];
-
-  for (let i = 0; i < particleCount; i += 2) {
-    if (i + 1 < particleCount) {
-      linePositions.push(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
-      linePositions.push(positions[(i + 1) * 3], positions[(i + 1) * 3 + 1], positions[(i + 1) * 3 + 2]);
-    }
-  }
-
-  lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
-  const lineSystem = new THREE.LineSegments(lineGeo, lineMaterial);
-  scene.add(lineSystem);
-
-  // Mouse interaction
-  let mouseX = 0;
-  let mouseY = 0;
-  let targetX = 0;
-  let targetY = 0;
-
-  window.addEventListener('mousemove', (e) => {
-    mouseX = (e.clientX - window.innerWidth / 2) * 0.0005;
-    mouseY = (e.clientY - window.innerHeight / 2) * 0.0005;
-  });
-
-  // Responsive Resize
-  window.addEventListener('resize', () => {
-    const newWidth = container.clientWidth || window.innerWidth;
-    const newHeight = container.clientHeight || 500;
-    camera.aspect = newWidth / newHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(newWidth, newHeight);
-  });
-
-  // Animation Loop
-  function animate() {
-    requestAnimationFrame(animate);
-
-    targetX += (mouseX - targetX) * 0.05;
-    targetY += (mouseY - targetY) * 0.05;
-
-    particleSystem.rotation.y += 0.0018 + targetX;
-    particleSystem.rotation.x += 0.0008 + targetY;
-    lineSystem.rotation.y = particleSystem.rotation.y;
-    lineSystem.rotation.x = particleSystem.rotation.x;
-
-    renderer.render(scene, camera);
-  }
-
-  animate();
+  // GSAP engine active in hero-gsap.js
 }
 
 /**

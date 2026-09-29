@@ -188,13 +188,14 @@ def encrypt_and_store(
 def decrypt_and_verify(
     transfer,
     receiver_ecc_key_record,
-    password: str,
-    upload_folder: str,
+    password: str = None,
+    upload_folder: str = None,
+    private_key_pem: str = None,
 ) -> bytes:
     """
     Full decryption pipeline for a file download:
 
-    Step 1: Recover receiver's ECC private key (using their password + stored encrypted key)
+    Step 1: Recover receiver's ECC private key (using session cache or password PBKDF2)
     Step 2: ECIES — recover the AES session key using receiver's private key
     Step 3: Read encrypted file from disk
     Step 4: AES-256-GCM decrypt the file (auto-verifies auth tag)
@@ -202,30 +203,37 @@ def decrypt_and_verify(
     Step 6: Return plaintext bytes
 
     Args:
-        transfer:              Transfer DB record (contains all crypto metadata).
+        transfer:                Transfer DB record (contains all crypto metadata).
         receiver_ecc_key_record: ECCKey DB record for the receiver.
-        password:              Receiver's plaintext password (for private key recovery).
-        upload_folder:         Server directory containing encrypted files.
+        password:                Receiver's plaintext password (for private key recovery).
+        upload_folder:           Server directory containing encrypted files.
+        private_key_pem:         Optional cached PEM private key to avoid re-derivation.
 
     Returns:
         Plaintext bytes of the original file.
 
     Raises:
-        ECCError:       On private key recovery or ECIES decryption failure.
+        ECCError:           On private key recovery or ECIES decryption failure.
         AESDecryptionError: On AES-GCM failure (auth tag mismatch).
-        IntegrityError: On SHA-256 mismatch.
-        FileNotFoundError: If encrypted file is missing from disk.
+        IntegrityError:     On SHA-256 mismatch.
+        FileNotFoundError:  If encrypted file is missing from disk.
     """
     from app.crypto.aes import AESDecryptionError
 
     # Step 1: Recover receiver's ECC private key
-    private_key = recover_private_key(
-        private_key_enc_hex=receiver_ecc_key_record.private_key_enc,
-        kdf_salt_hex=receiver_ecc_key_record.kdf_salt,
-        priv_nonce_hex=receiver_ecc_key_record.priv_nonce,
-        priv_auth_tag_hex=receiver_ecc_key_record.priv_auth_tag,
-        password=password,
-    )
+    if private_key_pem:
+        from app.crypto.ecc import deserialize_private_key
+        private_key = deserialize_private_key(private_key_pem)
+    elif password:
+        private_key = recover_private_key(
+            private_key_enc_hex=receiver_ecc_key_record.private_key_enc,
+            kdf_salt_hex=receiver_ecc_key_record.kdf_salt,
+            priv_nonce_hex=receiver_ecc_key_record.priv_nonce,
+            priv_auth_tag_hex=receiver_ecc_key_record.priv_auth_tag,
+            password=password,
+        )
+    else:
+        raise ECCError("No password or private key provided for decryption.")
 
     # Step 2: ECIES — recover AES session key
     session_key = ecies_decrypt_session_key(

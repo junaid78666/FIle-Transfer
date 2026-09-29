@@ -15,15 +15,37 @@
     </div>
 
     <form id="send-file-form" novalidate>
-      <!-- Recipient Selection Box -->
+      <!-- Recipient Picker — Live Search + User Card Grid -->
       <div class="recipient-selection-box">
-        <label for="receiver_id">1. Choose Recipient</label>
-        <select id="receiver_id" name="receiver_id" required>
-          <option value="">-- Select registered user --</option>
-        </select>
+        <label>1. Choose Recipient</label>
+
+        <!-- Hidden input carries the selected receiver_id for form submit -->
+        <input type="hidden" id="receiver_id" name="receiver_id">
+
+        <!-- Search Input -->
+        <div class="recipient-search-wrap">
+          <svg class="recipient-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            id="recipient-search-input"
+            class="recipient-search-input"
+            placeholder="Search by username…"
+            autocomplete="off"
+          >
+          <span id="recipient-loading-spinner" class="recipient-spinner hidden"></span>
+        </div>
+
+        <!-- User Card Grid -->
+        <div id="recipient-card-grid" class="recipient-card-grid">
+          <!-- Populated by dropzone.js -->
+        </div>
+
+        <!-- Selected User Confirmation Badge -->
         <div id="recipient-key-indicator" class="key-status-box hidden">
           <span class="key-dot"></span>
-          <span>Verified NIST P-256 Public Key loaded</span>
+          <span id="recipient-selected-label">Verified NIST P-256 Public Key loaded</span>
         </div>
       </div>
 

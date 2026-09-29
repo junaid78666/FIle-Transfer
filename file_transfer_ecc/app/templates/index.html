@@ -7,11 +7,94 @@
 {% endblock %}
 
 {% block content %}
-<!-- Hero Section with Three.js Ambient 3D Lattice Background -->
-<section class="hero-section">
-  <div id="hero-three-container" class="three-canvas-container" aria-hidden="true"></div>
+<!-- Hero Section with GSAP Animated Background & Three.js 3D Lattice -->
+<section class="hero-section" id="hero-section">
+  <!-- GSAP Ambient Background Viewport -->
+  <div class="hero-gsap-bg" id="hero-gsap-bg" aria-hidden="true">
+    <!-- Ambient Dynamic Glow Orbs -->
+    <div class="gsap-glow-orb orb-primary"></div>
+    <div class="gsap-glow-orb orb-secondary"></div>
+    <div class="gsap-glow-orb orb-tertiary"></div>
 
-  <div class="hero-content animate-fade-in-up" style="position: relative; z-index: 2;">
+    <!-- Cryptographic Coordinate Grid & Weierstrass Elliptic Curves SVG -->
+    <svg class="gsap-ecc-svg" viewBox="0 0 1200 650" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="eccGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#E5322D" stop-opacity="0.8"/>
+          <stop offset="50%" stop-color="#0284C7" stop-opacity="0.6"/>
+          <stop offset="100%" stop-color="#6366F1" stop-opacity="0.2"/>
+        </linearGradient>
+        <linearGradient id="eccGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#0284C7" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="#10B981" stop-opacity="0.3"/>
+        </linearGradient>
+        <pattern id="cryptoGrid" width="48" height="48" patternUnits="userSpaceOnUse">
+          <path d="M 48 0 L 0 0 0 48" fill="none" stroke="rgba(203, 213, 225, 0.4)" stroke-width="0.8"/>
+          <circle cx="48" cy="48" r="1.5" fill="rgba(2, 132, 199, 0.25)"/>
+        </pattern>
+      </defs>
+
+      <!-- Micro coordinate grid -->
+      <rect width="100%" height="100%" fill="url(#cryptoGrid)" class="gsap-grid-layer" opacity="0.6"/>
+
+      <!-- Mathematical Curves (Elliptic Curve Weierstraß Parametrics) -->
+      <g class="gsap-curve-group">
+        <path class="gsap-curve gsap-curve-1" d="M 100,325 C 260,110 420,540 600,325 C 780,110 940,540 1100,325" fill="none" stroke="url(#eccGrad1)" stroke-width="2.5" stroke-dasharray="12 6"/>
+        <path class="gsap-curve gsap-curve-2" d="M 80,260 C 280,480 480,170 660,370 C 840,170 1000,450 1140,280" fill="none" stroke="url(#eccGrad2)" stroke-width="2" stroke-dasharray="8 8"/>
+        <line class="gsap-secant-line" x1="260" y1="190" x2="880" y2="450" stroke="#E5322D" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.55"/>
+      </g>
+
+      <!-- Key Cryptographic Points & Additions -->
+      <g class="gsap-nodes-group">
+        <!-- Point P -->
+        <g class="gsap-node-wrapper" id="node-p-group">
+          <circle class="gsap-node-pulse" cx="340" cy="225" r="18" fill="rgba(229, 50, 45, 0.12)" stroke="#E5322D" stroke-width="1.5"/>
+          <circle class="gsap-node-core" cx="340" cy="225" r="7" fill="#E5322D"/>
+          <text class="gsap-node-text" x="355" y="220">P (Private Key Scalar d·G)</text>
+        </g>
+
+        <!-- Point Q -->
+        <g class="gsap-node-wrapper" id="node-q-group">
+          <circle class="gsap-node-pulse" cx="740" cy="390" r="18" fill="rgba(2, 132, 199, 0.12)" stroke="#0284C7" stroke-width="1.5"/>
+          <circle class="gsap-node-core" cx="740" cy="390" r="7" fill="#0284C7"/>
+          <text class="gsap-node-text" x="755" y="385">Q (Public Key Point)</text>
+        </g>
+
+        <!-- Shared Secret Point R -->
+        <g class="gsap-node-wrapper" id="node-r-group">
+          <circle class="gsap-node-pulse" cx="540" cy="310" r="22" fill="rgba(16, 185, 129, 0.15)" stroke="#10B981" stroke-width="1.8"/>
+          <circle class="gsap-node-core" cx="540" cy="310" r="8" fill="#10B981"/>
+          <text class="gsap-node-text" x="510" y="350">R = P + Q (ECDH Shared Key)</text>
+        </g>
+      </g>
+    </svg>
+
+    <!-- Floating Cryptographic Parallax Chips -->
+    <div class="gsap-chips-layer">
+      <div class="gsap-chip chip-1" data-depth="0.06">
+        <span class="chip-badge-dot"></span>
+        <span class="chip-label">NIST P-256</span>
+      </div>
+      <div class="gsap-chip chip-2" data-depth="-0.04">
+        <span class="chip-badge-dot emerald"></span>
+        <span class="chip-label">AES-256-GCM</span>
+      </div>
+      <div class="gsap-chip chip-3" data-depth="0.08">
+        <span class="chip-badge-dot blue"></span>
+        <span class="chip-label">ECDH Agreement</span>
+      </div>
+      <div class="gsap-chip chip-4" data-depth="-0.05">
+        <span class="chip-badge-dot"></span>
+        <span class="chip-label">SHA-256 Digest</span>
+      </div>
+      <div class="gsap-chip chip-5" data-depth="0.05">
+        <span class="chip-badge-dot indigo"></span>
+        <span class="chip-label">PBKDF2 100k</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-content" style="position: relative; z-index: 2;">
     <div class="crypto-badge hero-badge">
       <span class="pulse-dot"></span> 100% Free & Secure Hybrid Cryptography
     </div>
@@ -95,52 +178,6 @@
   </div>
 </section>
 
-<!-- Interactive 3D Elliptic Curve Geometry Section (Three.js) -->
-<section class="visualizer-section">
-  <div class="section-header">
-    <span class="crypto-badge">Mathematical Foundation</span>
-    <h2 class="section-title">Interactive 3D Elliptic Curve Arithmetic</h2>
-    <p class="section-subtitle">Real-time Three.js visualization of Weierstrass point addition: P + Q = R</p>
-  </div>
-
-  <div class="visualizer-split-grid">
-    <!-- Interactive Three.js WebGL Container -->
-    <div class="interactive-three-box" id="interactive-curve-container">
-      <span class="visualizer-badge">Three.js WebGL</span>
-      <span class="visualizer-hint">Drag mouse to orbit 3D curve</span>
-    </div>
-
-    <!-- Mathematical Explanation Card -->
-    <div class="visualizer-info-card card-hover-fx">
-      <h3>Weierstrass Equation & ECDH</h3>
-      <p>
-        The security of NIST P-256 relies on the <strong>Elliptic Curve Discrete Logarithm Problem (ECDLP)</strong>.
-        Given base generator point \( G \) and public key \( Q = d \cdot G \), computing private key \( d \) is computationally infeasible.
-      </p>
-
-      <div class="curve-points-legend">
-        <div class="legend-item">
-          <span class="legend-dot red"></span>
-          <div><strong>Point P (Alice):</strong> Sender's Ephemeral public point on curve</div>
-        </div>
-        <div class="legend-item">
-          <span class="legend-dot cyan"></span>
-          <div><strong>Point Q (Bob):</strong> Recipient's static NIST P-256 public key</div>
-        </div>
-        <div class="legend-item">
-          <span class="legend-dot green"></span>
-          <div><strong>Point R = P + Q:</strong> Intersecting chord and reflection yielding shared secret</div>
-        </div>
-      </div>
-
-      <div class="param-box">
-        Curve Equation: y&sup2; = x&sup3; - 3x + b (mod p)<br>
-        Prime field p = 2&sup2;&sup5;&sup6; - 2&sup2;&sup2;&sup4; + 2&sup1;&sup9;&sup2; + 2&sup9;&sup6; - 1<br>
-        Security Level: 128-bit (equivalent to RSA-3072)
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- 4-Stage Cryptographic Protocol Walkthrough -->
 <section class="protocol-section">
@@ -270,4 +307,8 @@
     </details>
   </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="{{ url_for('static', filename='js/hero-gsap.js') }}"></script>
 {% endblock %}

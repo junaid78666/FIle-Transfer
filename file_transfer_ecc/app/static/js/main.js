@@ -1,7 +1,7 @@
 /**
- * app/static/js/main.js — Global UI Handlers
+ * app/static/js/main.js - Global UI Handlers
  */
-import { apiRequest } from './api.js';
+import { apiRequest, clearTokens } from './api.js';
 import { showToast } from './toast.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -27,12 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const resp = await apiRequest('/auth/logout', { method: 'POST' });
         if (resp.ok) {
+          clearTokens();               // wipe JWT from localStorage
           showToast('Logged out successfully.', 'info');
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 800);
+          setTimeout(() => { window.location.href = '/'; }, 800);
         }
       } catch (err) {
+        clearTokens();
         window.location.href = '/';
       }
     });

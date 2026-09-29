@@ -23,7 +23,7 @@ import os
 
 from flask import (
     Blueprint, request, jsonify, current_app,
-    send_file, abort, render_template,
+    send_file, abort, render_template, session,
 )
 from flask_login import login_required, current_user
 
@@ -36,7 +36,10 @@ from app.transfer.utils import (
     delete_stored_file, format_file_size,
     FileValidationError,
 )
-from app.crypto.ecc import ECCError
+from app.crypto.ecc import (
+    ECCError, ecdsa_sign, ecdsa_verify, compute_transfer_digest,
+    deserialize_private_key, deserialize_public_key,
+)
 from app.crypto.aes import AESDecryptionError
 from app.crypto.hashing import IntegrityError
 
@@ -126,6 +129,21 @@ def send_file_transfer():
             "message": "An unexpected error occurred during encryption.",
         }), 500
 
+    # ── ECDSA Digital Signature by Sender ─────────────────────
+    sender_signature = None
+    priv_pem = session.get("_priv_key_pem")
+    if priv_pem:
+        try:
+            sender_priv = deserialize_private_key(priv_pem)
+            digest = compute_transfer_digest(
+                crypto_data["plaintext_sha256"],
+                crypto_data["ephemeral_public_key"],
+                receiver.id,
+            )
+            sender_signature = ecdsa_sign(sender_priv, digest)
+        except Exception as e:
+            current_app.logger.warning(f"[TRANSFER/SEND] Could not sign transfer with sender key: {e}")
+
     # ── Create Transfer DB record ─────────────────────────────
     transfer = Transfer(
         sender_id=current_user.id,
@@ -141,6 +159,7 @@ def send_file_transfer():
         wrap_auth_tag=crypto_data["wrap_auth_tag"],
         aes_nonce=crypto_data["aes_nonce"],
         aes_auth_tag=crypto_data["aes_auth_tag"],
+        sender_signature=sender_signature,
         status=TransferStatus.PENDING,
     )
     db.session.add(transfer)
@@ -202,14 +221,65 @@ def download_file(transfer_id: str):
             "message": "Access denied. You are not the intended recipient of this transfer.",
         }), 403
 
-    # ── Get password from request ─────────────────────────────
+    # ── Status check: ensure transfer is available ────────────
+    if transfer.status == TransferStatus.DOWNLOADED:
+        return jsonify({
+            "status": "error",
+            "message": "This file transfer has already been downloaded.",
+        }), 410
+    if transfer.status == TransferStatus.FAILED:
+        return jsonify({
+            "status": "error",
+            "message": "This file transfer has failed integrity checks and cannot be downloaded.",
+        }), 410
+
+    # ── Authenticate receiver & retrieve key ──────────────────
     data = request.get_json(silent=True) or {}
     password = data.get("password", "").strip()
+    cached_priv_pem = session.get("_priv_key_pem")
+
     if not password:
         return jsonify({
             "status": "error",
             "message": "Your password is required to decrypt and recover the file.",
         }), 400
+
+    # Fast DoS mitigation: Validate password against bcrypt BEFORE expensive PBKDF2
+    from app import bcrypt
+    if not bcrypt.check_password_hash(current_user.password_hash, password):
+        current_app.logger.warning(
+            f"[TRANSFER/DOWNLOAD] Failed password check: user_id={current_user.id}, transfer_id={transfer_id}"
+        )
+        return jsonify({
+            "status": "error",
+            "message": "Decryption failed. Your password may be incorrect.",
+        }), 422
+
+    # ── Verify Sender ECDSA Digital Signature ─────────────────
+    if transfer.sender_signature and transfer.sender and transfer.sender.ecc_key:
+        try:
+            sender_pub = deserialize_public_key(transfer.sender.ecc_key.public_key)
+            digest = compute_transfer_digest(
+                transfer.plaintext_sha256,
+                transfer.ephemeral_public_key,
+                transfer.receiver_id,
+            )
+            if not ecdsa_verify(sender_pub, transfer.sender_signature, digest):
+                current_app.logger.error(
+                    f"[TRANSFER/DOWNLOAD] Sender ECDSA signature verification FAILED: transfer_id={transfer_id}"
+                )
+                transfer.mark_failed()
+                return jsonify({
+                    "status": "error",
+                    "message": "Sender authenticity check failed. The file transfer signature is invalid or tampered.",
+                }), 422
+        except Exception as e:
+            current_app.logger.error(f"[TRANSFER/DOWNLOAD] Signature verification exception: {e}")
+            transfer.mark_failed()
+            return jsonify({
+                "status": "error",
+                "message": "Cryptographic authenticity verification failed.",
+            }), 422
 
     # ── Decrypt and verify ────────────────────────────────────
     upload_folder = current_app.config["UPLOAD_FOLDER"]
@@ -227,6 +297,7 @@ def download_file(transfer_id: str):
             receiver_ecc_key_record=receiver_ecc_key,
             password=password,
             upload_folder=upload_folder,
+            private_key_pem=cached_priv_pem,
         )
     except ECCError as e:
         current_app.logger.warning(

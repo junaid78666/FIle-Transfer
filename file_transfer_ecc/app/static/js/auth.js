@@ -1,8 +1,27 @@
 /**
- * app/static/js/auth.js — Authentication Controller & Password Meter
+ * app/static/js/auth.js - Authentication Controller & Password Meter
  */
-import { apiRequest } from './api.js';
+import { apiRequest, saveTokens, clearTokens, getAccessToken } from './api.js';
 import { showToast } from './toast.js';
+
+// On page load: if a valid token exists in localStorage, skip login/register
+// and go straight to the dashboard.
+(async () => {
+  const tok = getAccessToken();
+  if (tok && (window.location.pathname.startsWith('/auth/login') || window.location.pathname.startsWith('/auth/register'))) {
+    try {
+      const resp = await fetch('/auth/verify', {
+        headers: { 'Authorization': 'Bearer ' + tok, 'Accept': 'application/json' },
+      });
+      if (resp.ok) {
+        window.location.replace('/dashboard');
+        return;
+      }
+    } catch (_) {}
+    // Token invalid - clear it and let user see the login/register page
+    clearTokens();
+  }
+})();
 
 // Registration form handler
 const registerForm = document.getElementById('register-form');
@@ -26,28 +45,27 @@ if (registerForm) {
     btn.textContent = 'Generating SECP256R1 Keypair...';
 
     const payload = {
-      username: document.getElementById('username').value.trim(),
-      email: document.getElementById('email').value.trim(),
-      password: pwdInput.value,
+      username:         document.getElementById('username').value.trim(),
+      email:            document.getElementById('email').value.trim(),
+      password:         pwdInput.value,
       confirm_password: document.getElementById('confirm_password').value,
     };
 
     try {
       const resp = await apiRequest('/auth/register', {
         method: 'POST',
-        body: JSON.stringify(payload),
+        body:   JSON.stringify(payload),
       });
-
       const data = await resp.json();
 
       if (resp.status === 201) {
-        showToast('Registration successful! Redirecting to login...', 'success');
-        setTimeout(() => {
-          window.location.href = '/auth/login';
-        }, 1200);
+        // Save JWT tokens from the auto-login response
+        if (data.tokens) saveTokens(data.tokens);
+        showToast(data.message || 'Account created! Welcome aboard.', 'success');
+        setTimeout(() => { window.location.href = data.redirect || '/dashboard'; }, 900);
       } else {
-        const errorMsg = data.errors ? data.errors.join(' ') : (data.message || 'Registration failed.');
-        showToast(errorMsg, 'danger');
+        const msg = data.errors ? data.errors.join(' ') : (data.message || 'Registration failed.');
+        showToast(msg, 'danger');
         btn.disabled = false;
         btn.textContent = 'Generate Keys & Create Account';
       }
@@ -69,19 +87,20 @@ if (loginForm) {
     btn.textContent = 'Verifying Session...';
 
     const payload = {
-      email: document.getElementById('email').value.trim(),
+      email:    document.getElementById('email').value.trim(),
       password: document.getElementById('password').value,
     };
 
     try {
       const resp = await apiRequest('/auth/login', {
         method: 'POST',
-        body: JSON.stringify(payload),
+        body:   JSON.stringify(payload),
       });
-
       const data = await resp.json();
 
       if (resp.status === 200) {
+        // Persist JWT in localStorage for future page loads
+        if (data.tokens) saveTokens(data.tokens);
         showToast('Authentication successful!', 'success');
         window.location.href = '/dashboard';
       } else {

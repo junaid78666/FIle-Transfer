@@ -127,6 +127,13 @@ class Transfer(db.Model):
         comment="GCM auth tag for file encryption (hex, 16 bytes)",
     )
 
+    # ── Digital Signature (ECDSA) ────────────────────────────
+    sender_signature = db.Column(
+        db.Text,
+        nullable=True,
+        comment="ECDSA SHA-256 signature by sender's private key",
+    )
+
     # ── Status ────────────────────────────────────────────────
     status = db.Column(
         db.String(20),
@@ -225,5 +232,6 @@ class Transfer(db.Model):
                 "aes_nonce": self.aes_nonce,
                 "aes_auth_tag": self.aes_auth_tag,
                 "stored_filename": self.stored_filename,
+                "sender_signature": self.sender_signature,
             })
         return data

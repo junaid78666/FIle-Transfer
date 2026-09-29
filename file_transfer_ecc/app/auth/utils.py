@@ -14,7 +14,9 @@ from flask import current_app
 from app import db, bcrypt
 from app.models.user import User
 from app.models.ecc_key import ECCKey
-from app.crypto.ecc import generate_ecc_keypair, protect_private_key, serialize_public_key
+from app.crypto.ecc import (
+    generate_ecc_keypair, protect_private_key, serialize_public_key, serialize_private_key
+)
 from app.crypto.aes import bytes_to_hex
 
 
@@ -71,6 +73,8 @@ def register_user(username: str, email: str, password: str) -> User:
 
     # 6. Commit both records atomically
     db.session.commit()
+
+    user._priv_key_pem = serialize_private_key(private_key)
 
     current_app.logger.info(
         f"[AUTH] New user registered: username='{user.username}' "

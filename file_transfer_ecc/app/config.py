@@ -70,6 +70,18 @@ class BaseConfig:
     # ── ECC Curve ─────────────────────────────────────────────
     ECC_CURVE: str = "P-256"  # NIST P-256 / secp256r1
 
+    # ── JWT ───────────────────────────────────────────────────
+    JWT_SECRET_KEY: str = os.environ.get(
+        "JWT_SECRET_KEY", "jwt-secret-key-change-in-production-!!!"
+    )
+    # Access token: 7 days; refresh token: 30 days
+    JWT_ACCESS_TOKEN_EXPIRES: timedelta = timedelta(
+        days=int(os.environ.get("JWT_ACCESS_TOKEN_DAYS", 7))
+    )
+    JWT_REFRESH_TOKEN_EXPIRES: timedelta = timedelta(
+        days=int(os.environ.get("JWT_REFRESH_TOKEN_DAYS", 30))
+    )
+
 
 class DevelopmentConfig(BaseConfig):
     """Development environment — verbose logging, SQLite."""

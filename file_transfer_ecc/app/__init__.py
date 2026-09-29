@@ -67,15 +67,24 @@ def create_app(config_name: str = None) -> Flask:
 
     @login_manager.unauthorized_handler
     def unauthorized():
-        """Return 401 JSON for unauthenticated API requests instead of 302 redirect."""
-        from flask import jsonify
-        return jsonify({
-            "status": "error",
-            "message": "Authentication required. Please log in.",
-            "code": 401,
-        }), 401
+        """Return 302 redirect for browser users, or 401 JSON for API / AJAX requests."""
+        from flask import request, redirect, url_for, jsonify
+        accept = request.headers.get("Accept", "")
+        if (
+            request.is_json
+            or "application/json" in accept
+            or request.headers.get("X-Requested-With") == "XMLHttpRequest"
+            or request.headers.get("Authorization")
+            or not accept.startswith("text/html")
+        ):
+            return jsonify({
+                "status": "error",
+                "message": "Authentication required. Please log in.",
+                "code": 401,
+            }), 401
+        return redirect(url_for("auth.login", next=request.path))
 
-    # ── User loader callback ──────────────────────────────────
+    # ── User loaders ──────────────────────────────────────────
     from app.models.user import User  # Import here to avoid circular imports
 
     @login_manager.user_loader
@@ -88,6 +97,34 @@ def create_app(config_name: str = None) -> Flask:
         except Exception:
             db.session.rollback()
         return None
+
+    @login_manager.request_loader
+    def load_user_from_request(req):
+        """
+        Authenticate requests via JWT Bearer token in Authorization header.
+        Enables seamless dual-mode authentication: Bearer token OR Session cookie.
+        """
+        auth_header = req.headers.get("Authorization", "")
+        parts = auth_header.split()
+        if len(parts) == 2 and parts[0].lower() == "bearer":
+            token = parts[1]
+            try:
+                from app.auth.jwt import get_user_from_access_token
+                return get_user_from_access_token(token)
+            except Exception:
+                return None
+        return None
+
+    # ── Enable SQLite Foreign Keys ────────────────────────────
+    from sqlalchemy import event
+    from sqlalchemy.engine import Engine
+
+    @event.listens_for(Engine, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        if app.config.get("SQLALCHEMY_DATABASE_URI", "").startswith("sqlite"):
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
 
     # ── Register Blueprints ───────────────────────────────────
     _register_blueprints(app)

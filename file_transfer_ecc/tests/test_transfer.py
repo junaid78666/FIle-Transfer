@@ -448,3 +448,123 @@ class TestTransferManagement:
 
         response = client.delete(f"/transfer/delete/{transfer_id}")
         assert response.status_code == 403
+
+
+# ══════════════════════════════════════════════════════════════
+# Critical Vulnerability Fixes Verification Tests
+# ══════════════════════════════════════════════════════════════
+
+class TestCriticalVulnerabilityFixes:
+
+    def _setup_signed_transfer(self, app, client):
+        register_user(client, ALICE)
+        register_user(client, BOB)
+        login_as(client, ALICE["email"])
+        bob_id = get_user_id(app, BOB["email"])
+        resp = client.post(
+            "/transfer/send",
+            data={**make_file_data(), "receiver_id": bob_id},
+            content_type="multipart/form-data",
+        )
+        assert resp.status_code == 201
+        transfer_id = resp.get_json()["transfer"]["transfer_id"]
+        logout(client)
+        return transfer_id
+
+    def test_transfer_has_valid_ecdsa_signature(self, app, client):
+        """C1 Fix: Sender cryptographically signs transfer with ECDSA."""
+        transfer_id = self._setup_signed_transfer(app, client)
+        from app.crypto.ecc import deserialize_public_key, ecdsa_verify, compute_transfer_digest
+
+        with app.app_context():
+            transfer = db.session.get(Transfer, transfer_id)
+            assert transfer.sender_signature is not None
+            assert len(transfer.sender_signature) > 60
+
+            # Verify signature with Alice's public key
+            alice = db.session.get(User, transfer.sender_id)
+            alice_pub = deserialize_public_key(alice.ecc_key.public_key)
+            digest = compute_transfer_digest(
+                transfer.plaintext_sha256,
+                transfer.ephemeral_public_key,
+                transfer.receiver_id,
+            )
+            assert ecdsa_verify(alice_pub, transfer.sender_signature, digest) is True
+
+    def test_tampered_signature_rejects_download(self, app, client):
+        """C1 Fix: Tampered or forged transfer signature is detected and rejected with 422."""
+        transfer_id = self._setup_signed_transfer(app, client)
+
+        # Corrupt the sender's signature in DB (simulating attacker tampering)
+        with app.app_context():
+            transfer = db.session.get(Transfer, transfer_id)
+            transfer.sender_signature = "deadbeef" * 16
+            db.session.commit()
+
+        login_as(client, BOB["email"])
+        resp = client.post(
+            f"/transfer/download/{transfer_id}",
+            json={"password": BOB["password"]},
+        )
+        assert resp.status_code == 422
+        data = resp.get_json()
+        assert "Sender authenticity check failed" in data["message"]
+
+    def test_re_downloading_returns_410(self, app, client):
+        """H4/C4 Fix: Already downloaded transfer cannot be downloaded again (returns 410)."""
+        transfer_id = self._setup_signed_transfer(app, client)
+        login_as(client, BOB["email"])
+
+        # First download succeeds (200)
+        first_resp = client.post(
+            f"/transfer/download/{transfer_id}",
+            json={"password": BOB["password"]},
+        )
+        assert first_resp.status_code == 200
+
+        # Second download attempt is rejected with 410 (Gone)
+        second_resp = client.post(
+            f"/transfer/download/{transfer_id}",
+            json={"password": BOB["password"]},
+        )
+        assert second_resp.status_code == 410
+        assert "already been downloaded" in second_resp.get_json()["message"]
+
+    def test_jwt_bearer_token_authenticates_transfer_routes(self, app, client):
+        """C2 Fix: API client can access transfer routes using only JWT Bearer token (no cookies)."""
+        register_user(client, ALICE)
+        login_resp = login_as(client, ALICE["email"])
+        tokens = login_resp.get_json()["tokens"]
+        access_token = tokens["access_token"]
+
+        # Clear session cookies to simulate a pure API/mobile client
+        with client.session_transaction() as sess:
+            sess.clear()
+
+        # Call /transfer/sent with Bearer token
+        resp = client.get(
+            "/transfer/sent",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["status"] == "success"
+
+        # Call /transfer/stats with Bearer token
+        stats_resp = client.get(
+            "/transfer/stats",
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
+        assert stats_resp.status_code == 200
+        assert "stats" in stats_resp.get_json()
+        logout(client)
+
+    def test_invalid_jwt_bearer_token_returns_401(self, app):
+        """C2 Fix: Invalid JWT Bearer token is rejected with 401."""
+        client = app.test_client()
+        resp = client.get(
+            "/transfer/inbox",
+            headers={"Authorization": "Bearer completely.invalid.jwt.token"},
+        )
+        assert resp.status_code == 401
+

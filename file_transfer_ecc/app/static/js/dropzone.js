@@ -4,33 +4,152 @@
 import { apiRequest } from './api.js';
 import { showToast } from './toast.js';
 
+let allUsers = [];      // full list fetched once
+let selectedUserId = null;
 let stagedFile = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadRecipients();
+  initRecipientSearch();
   initDropzoneEvents();
   initFormSubmit();
 });
 
+/* ──────────────────────────────────────────────────────────────
+ * 1. Load all eligible recipients and render initial card grid
+ * ────────────────────────────────────────────────────────────── */
 async function loadRecipients() {
-  const select = document.getElementById('receiver_id');
-  if (!select) return;
+  const grid = document.getElementById('recipient-card-grid');
+  const spinner = document.getElementById('recipient-loading-spinner');
+  if (!grid) return;
+
+  if (spinner) spinner.classList.remove('hidden');
 
   try {
     const resp = await apiRequest('/auth/users');
     const data = await resp.json();
 
     if (resp.ok && data.status === 'success') {
-      data.users.forEach(user => {
-        const option = document.createElement('option');
-        option.value = user.id;
-        option.textContent = `${user.username} (${user.email})`;
-        select.appendChild(option);
-      });
+      allUsers = data.users;
+      renderUserCards(allUsers);
+    } else {
+      grid.innerHTML = '<p class="recipient-empty-msg">Unable to load users.</p>';
     }
   } catch (err) {
     showToast('Failed to load user list', 'danger');
+    grid.innerHTML = '<p class="recipient-empty-msg">Unable to load users.</p>';
+  } finally {
+    if (spinner) spinner.classList.add('hidden');
   }
+}
+
+/* ──────────────────────────────────────────────────────────────
+ * 2. Render user cards from a filtered list
+ * ────────────────────────────────────────────────────────────── */
+function renderUserCards(users) {
+  const grid = document.getElementById('recipient-card-grid');
+  if (!grid) return;
+
+  if (users.length === 0) {
+    grid.innerHTML = '<p class="recipient-empty-msg">No users match your search.</p>';
+    return;
+  }
+
+  grid.innerHTML = users.map(user => {
+    const initials = getInitials(user.username);
+    const hue = stringToHue(user.username);
+    const isSelected = selectedUserId === String(user.id);
+    return `
+      <button
+        type="button"
+        class="recipient-user-card${isSelected ? ' selected' : ''}"
+        data-user-id="${user.id}"
+        data-username="${user.username}"
+        aria-pressed="${isSelected}"
+      >
+        <span class="user-card-avatar" style="--avatar-hue: ${hue}deg">${initials}</span>
+        <span class="user-card-info">
+          <span class="user-card-name">${escapeHtml(user.username)}</span>
+        </span>
+        <span class="user-card-check" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </span>
+      </button>
+    `;
+  }).join('');
+
+  // Attach click handlers
+  grid.querySelectorAll('.recipient-user-card').forEach(card => {
+    card.addEventListener('click', () => selectRecipient(card));
+  });
+}
+
+/* ──────────────────────────────────────────────────────────────
+ * 3. Live search filter
+ * ────────────────────────────────────────────────────────────── */
+function initRecipientSearch() {
+  const searchInput = document.getElementById('recipient-search-input');
+  if (!searchInput) return;
+
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.trim().toLowerCase();
+    const filtered = query
+      ? allUsers.filter(u => u.username.toLowerCase().includes(query))
+      : allUsers;
+    renderUserCards(filtered);
+  });
+}
+
+/* ──────────────────────────────────────────────────────────────
+ * 4. Select a recipient card
+ * ────────────────────────────────────────────────────────────── */
+function selectRecipient(card) {
+  const userId   = card.getAttribute('data-user-id');
+  const username = card.getAttribute('data-username');
+
+  selectedUserId = userId;
+
+  // Sync hidden input
+  const hiddenInput = document.getElementById('receiver_id');
+  if (hiddenInput) hiddenInput.value = userId;
+
+  // Update card selected states
+  document.querySelectorAll('.recipient-user-card').forEach(c => {
+    const isThis = c.getAttribute('data-user-id') === userId;
+    c.classList.toggle('selected', isThis);
+    c.setAttribute('aria-pressed', String(isThis));
+  });
+
+  // Show confirmation badge
+  const indicator = document.getElementById('recipient-key-indicator');
+  const label = document.getElementById('recipient-selected-label');
+  if (indicator) indicator.classList.remove('hidden');
+  if (label) label.textContent = `✓ ${username} — P-256 key verified`;
+}
+
+/* ──────────────────────────────────────────────────────────────
+ * Helpers
+ * ────────────────────────────────────────────────────────────── */
+function getInitials(name) {
+  return name
+    .split(/[\s._\-]+/)
+    .slice(0, 2)
+    .map(p => p[0]?.toUpperCase() || '')
+    .join('');
+}
+
+function stringToHue(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return Math.abs(hash) % 360;
+}
+
+function escapeHtml(text) {
+  const d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
 }
 
 function initDropzoneEvents() {

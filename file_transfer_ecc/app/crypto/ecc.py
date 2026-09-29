@@ -363,3 +363,78 @@ def ecies_decrypt_session_key(
         )
     except Exception as exc:
         raise ECCError(f"ECIES decryption error: {exc}") from exc
+
+
+# ══════════════════════════════════════════════════════════════
+# SECTION 4 — ECDSA Digital Signatures & Authenticity Binding
+# ══════════════════════════════════════════════════════════════
+
+def compute_transfer_digest(
+    plaintext_sha256: str,
+    ephemeral_public_key_pem: str,
+    receiver_id: int,
+) -> bytes:
+    """
+    Compute a canonical binding digest for transfer authentication.
+    Binds the file integrity hash, the ephemeral ECDH public key, and the intended recipient.
+
+    Args:
+        plaintext_sha256:         SHA-256 hex digest of the plaintext file.
+        ephemeral_public_key_pem: PEM string of the ephemeral public key.
+        receiver_id:              User ID of the intended recipient.
+
+    Returns:
+        32-byte SHA-256 digest.
+    """
+    import hashlib
+    payload = f"{plaintext_sha256.strip().lower()}:{ephemeral_public_key_pem.strip()}:{receiver_id}".encode("utf-8")
+    return hashlib.sha256(payload).digest()
+
+
+def ecdsa_sign(private_key, data: bytes) -> str:
+    """
+    Cryptographically sign data using the sender's ECC private key (ECDSA-SHA256).
+
+    Provides authenticity and non-repudiation: confirms the file transfer was
+    generated and authorized by the sender.
+
+    Args:
+        private_key: cryptography ECC private key object.
+        data:        Raw bytes to sign (typically the transfer binding digest).
+
+    Returns:
+        Hex-encoded DER signature string.
+    """
+    try:
+        signature = private_key.sign(
+            data,
+            ec.ECDSA(hashes.SHA256()),
+        )
+        return bytes_to_hex(signature)
+    except Exception as exc:
+        raise ECCError(f"ECDSA signing failed: {exc}") from exc
+
+
+def ecdsa_verify(public_key, signature_hex: str, data: bytes) -> bool:
+    """
+    Verify an ECDSA-SHA256 signature using the sender's ECC public key.
+
+    Args:
+        public_key:    cryptography ECC public key object.
+        signature_hex: Hex-encoded DER signature string.
+        data:          Raw bytes that were signed.
+
+    Returns:
+        True if the signature is valid; False otherwise.
+    """
+    try:
+        signature = hex_to_bytes(signature_hex)
+        public_key.verify(
+            signature,
+            data,
+            ec.ECDSA(hashes.SHA256()),
+        )
+        return True
+    except Exception:
+        return False
+
